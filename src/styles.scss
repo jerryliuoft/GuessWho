@@ -2,3 +2,32 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+/* Add styles to prevent horizontal overflow and white bar on mobile */
+.app-container {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body, html {
+  width: 100vw;
+  overflow-x: hidden;
+}
+
+.game-card {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+  .app-container {
+    padding: 0 4px;
+  }
+  .game-card {
+    margin: 0 0.5rem;
+    width: calc(100vw - 1rem);
+    min-width: 0;
+  }
+}

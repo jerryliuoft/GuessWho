@@ -6,11 +6,14 @@ import {
   ViewChild,
   AfterViewInit,
 } from '@angular/core';
-import { CharacterGridComponent, Character } from './character-grid.component';
+import {
+  CharacterGridComponent,
+  Character,
+} from './character-grid.component/character-grid.component';
 import {
   CharacterSetSelectorComponent,
   CharacterSet,
-} from './character-set-selector.component';
+} from './character-set-selector.component/character-set-selector.component';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatToolbarModule } from '@angular/material/toolbar';

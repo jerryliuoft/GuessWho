@@ -1,5 +1,5 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { Character } from './character-grid.component';
+import { Character } from './character-grid.component/character-grid.component';
 
 @Injectable({ providedIn: 'root' })
 export class GameService {

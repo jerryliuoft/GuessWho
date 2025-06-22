@@ -1,0 +1,62 @@
+.set-selector-form {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 0;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 0 0.5rem 0.5rem;
+  background: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  position: relative;
+  z-index: 2;
+}
+.set-selector-left {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+}
+.set-selector-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 0 0 auto;
+}
+.set-select-field {
+  min-width: 180px;
+  max-width: 260px;
+  width: 100%;
+}
+.browse-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  height: 40px;
+  padding: 0 1.2rem;
+  white-space: nowrap;
+}
+@media (max-width: 600px) {
+  .set-selector-form {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    padding: 0.5rem;
+  }
+  .set-selector-left,
+  .set-selector-right {
+    width: 100%;
+    justify-content: stretch;
+  }
+  .set-select-field {
+    min-width: 100%;
+    max-width: 100%;
+    width: 100%;
+  }
+  .browse-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
