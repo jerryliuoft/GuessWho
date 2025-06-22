@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   signal,
   computed,
+  input,
 } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -28,6 +29,20 @@ export interface Character {
       >
         <mat-icon>refresh</mat-icon> Reset All
       </button>
+      <button
+        type="button"
+        class="sort-toggle-btn"
+        (click)="toggleSortUnmarkedFirst()"
+        [attr.aria-pressed]="sortUnmarkedFirst()"
+        [title]="
+          sortUnmarkedFirst() ? 'Show marked at end' : 'Show original order'
+        "
+      >
+        <mat-icon>{{
+          sortUnmarkedFirst() ? 'filter_alt' : 'filter_alt_off'
+        }}</mat-icon>
+        {{ sortUnmarkedFirst() ? 'Unmarked First' : 'Original Order' }}
+      </button>
       <span class="remaining-count" aria-live="polite">
         {{ characters().length - markedCount() }} remaining
       </span>
@@ -37,6 +52,7 @@ export interface Character {
       <mat-card
         class="character-tile"
         [class.marked]="isMarked(character)"
+        [class.target-tile]="target() && character.name === target()?.name"
         (click)="toggleMark(character)"
         (keydown.enter)="toggleMark(character)"
         (keydown.space)="toggleMark(character)"
@@ -47,12 +63,23 @@ export interface Character {
         [attr.aria-pressed]="isMarked(character)"
         [attr.aria-label]="
           character.name +
-          (isMarked(character) ? ' (marked as eliminated)' : '')
+          (isMarked(character) ? ' (marked as eliminated)' : '') +
+          (target() && character.name === target()?.name
+            ? ' (target character)'
+            : '')
         "
         [attr.title]="character.name"
       >
         @if (isMarked(character)) {
         <span class="visually-hidden">Marked as eliminated</span>
+        } @if (target() && character.name === target()?.name) {
+        <span
+          class="target-indicator"
+          aria-label="Target character"
+          title="Target character"
+        >
+          <mat-icon class="target-icon">star</mat-icon>
+        </span>
         }
         <img
           [ngSrc]="character.imageUrl"
@@ -69,15 +96,34 @@ export interface Character {
   styleUrls: ['./character-grid.component.scss'],
 })
 export class CharacterGridComponent {
+  target = input<Character | null>();
+
   private _characters = signal<Character[]>([]);
   private _marked = signal<Set<string>>(new Set());
+  private _sortUnmarkedFirst = signal(true);
 
   input(characters: Character[]) {
     this._characters.set(characters);
     this._marked.set(new Set()); // Reset marks when new set is loaded
   }
 
-  characters = computed(() => this._characters());
+  sortUnmarkedFirst = computed(() => this._sortUnmarkedFirst());
+
+  toggleSortUnmarkedFirst() {
+    this._sortUnmarkedFirst.set(!this._sortUnmarkedFirst());
+  }
+
+  characters = computed(() => {
+    const chars = this._characters();
+    if (!this._sortUnmarkedFirst()) return chars;
+    const marked = this._marked();
+    return [...chars].sort((a, b) => {
+      const aMarked = marked.has(a.name);
+      const bMarked = marked.has(b.name);
+      if (aMarked === bMarked) return 0;
+      return aMarked ? 1 : -1;
+    });
+  });
   markedCount = computed(() => this._marked().size);
 
   isMarked(character: Character): boolean {

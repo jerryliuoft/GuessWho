@@ -41,13 +41,13 @@
 .character-tile {
   position: relative;
   flex: 1 0 140px;
-  max-width: 180px;
-  min-width: 120px;
+  max-width: 220px;
+  min-width: 160px;
   box-sizing: border-box;
   cursor: pointer;
   border: 2px solid transparent;
   border-radius: 1rem;
-  padding: 1rem 0.5rem 0.75rem 0.5rem;
+  padding: 1.25rem 0.5rem 1rem 0.5rem;
   text-align: center;
   box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.04);
   transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, opacity 0.2s,
@@ -136,8 +136,8 @@
   box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.08);
   margin-bottom: 0.5rem;
   background: #f5f7fa;
-  width: 100px;
-  height: 100px;
+  width: 140px;
+  height: 140px;
   object-fit: cover;
 }
 .character-name {
@@ -157,4 +157,65 @@
   overflow: hidden;
   clip: rect(0 0 0 0);
   border: 0;
+}
+.character-tile.target-tile {
+  border: 3px solid #ffd600;
+  box-shadow: 0 0 0 4px #fffde7, 0 2px 12px 0 rgba(255, 214, 0, 0.18);
+  position: relative;
+  z-index: 2;
+  animation: targetPulse 1.2s infinite alternate;
+}
+@keyframes targetPulse {
+  0% {
+    box-shadow: 0 0 0 4px #fffde7, 0 2px 12px 0 rgba(255, 214, 0, 0.18);
+  }
+  100% {
+    box-shadow: 0 0 0 8px #fffde7, 0 2px 18px 0 rgba(255, 214, 0, 0.28);
+  }
+}
+.target-indicator {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: #ffd600;
+  color: #fff;
+  border-radius: 50%;
+  padding: 4px 5px 4px 6px;
+  box-shadow: 0 1px 6px 0 rgba(255, 214, 0, 0.18);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+  min-width: 28px;
+  min-height: 28px;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+.target-icon {
+  font-size: 1.35rem;
+  color: #ffab00;
+  filter: drop-shadow(0 2px 6px rgba(255, 214, 0, 0.18));
+  display: block;
+  margin: 0 auto;
+}
+.sort-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #f5f7fa;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1976d2;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-left: 0.5rem;
+}
+.sort-toggle-btn:hover,
+.sort-toggle-btn:focus {
+  background: #e3eafc;
+  outline: none;
 }

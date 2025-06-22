@@ -39,10 +39,12 @@ import { MatSelectModule } from '@angular/material/select';
 })
 export class App implements AfterViewInit {
   private _characters = signal<Character[]>([]);
+  private _targetCharacter = signal<Character | null>(null);
 
   @ViewChild('grid') gridComponent?: CharacterGridComponent;
 
   characters = computed(() => this._characters());
+  targetCharacter = computed(() => this._targetCharacter());
 
   ngAfterViewInit() {
     if (this.gridComponent) {
@@ -52,6 +54,12 @@ export class App implements AfterViewInit {
 
   onSetSelected(set: CharacterSet) {
     this._characters.set(set.characters);
+    if (set.characters.length > 0) {
+      const randomIdx = Math.floor(Math.random() * set.characters.length);
+      this._targetCharacter.set(set.characters[randomIdx]);
+    } else {
+      this._targetCharacter.set(null);
+    }
     if (this.gridComponent) {
       this.gridComponent.input(set.characters);
     }
