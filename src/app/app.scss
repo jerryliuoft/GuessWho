@@ -1,0 +1,102 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  background: var(--mdc-theme-background, #f5f7fa);
+  color: var(--mdc-theme-on-background, #222b45);
+}
+
+.app-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.04);
+  .toolbar-title {
+    font-size: 2rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .toolbar-spacer {
+    flex: 1 1 auto;
+  }
+  .toolbar-subtitle {
+    font-size: 1rem;
+    color: var(--mdc-theme-on-primary, #6b7280);
+    font-weight: 400;
+    margin-left: 1rem;
+  }
+}
+
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  background: var(--mdc-theme-background, #f5f7fa);
+  padding: 0 1rem 2rem 1rem;
+}
+
+.game-card {
+  width: 100%;
+  max-width: 700px;
+  margin: 2.5rem 0 2rem 0;
+  padding: 2rem 2rem 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  background: var(--mdc-theme-surface, #fff);
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.12);
+}
+
+.set-selector-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1.5rem;
+}
+
+.divider {
+  margin: 0 0 1.5rem 0;
+}
+
+.character-grid-section {
+  width: 100%;
+  min-height: 350px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.app-footer {
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+  color: var(--mdc-theme-on-surface, #6b7280);
+  font-size: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e7ef;
+  letter-spacing: 0.01em;
+}
+
+@media (max-width: 900px) {
+  .game-card,
+  .app-footer {
+    max-width: 98vw;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+@media (max-width: 600px) {
+  .game-card {
+    padding: 1rem 0.5rem 1.5rem 0.5rem;
+    border-radius: 1rem;
+  }
+  .app-toolbar .toolbar-title {
+    font-size: 1.5rem;
+  }
+}

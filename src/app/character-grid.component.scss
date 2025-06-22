@@ -1,0 +1,160 @@
+// Styles moved from character-grid.component.ts
+.character-grid-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+.reset-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f5f7fa;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1976d2;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.reset-btn:hover,
+.reset-btn:focus {
+  background: #e3eafc;
+  outline: none;
+}
+.remaining-count {
+  font-size: 1rem;
+  color: #555;
+  font-weight: 500;
+}
+.character-grid {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+.character-tile {
+  position: relative;
+  flex: 1 0 140px;
+  max-width: 180px;
+  min-width: 120px;
+  box-sizing: border-box;
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-radius: 1rem;
+  padding: 1rem 0.5rem 0.75rem 0.5rem;
+  text-align: center;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.04);
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, opacity 0.2s,
+    transform 0.15s;
+  background: var(--mdc-theme-surface, #fff);
+  outline: none;
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  will-change: transform, box-shadow, border-color, background, opacity;
+}
+.character-tile:hover:not(.marked),
+.character-tile:focus-visible:not(.marked) {
+  border-color: #1976d2;
+  box-shadow: 0 0 0 2px #90caf9, 0 2px 8px 0 rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px) scale(1.03);
+  z-index: 1;
+}
+.character-tile:active:not(.marked) {
+  background: #e3eafc;
+}
+.character-tile.marked {
+  opacity: 0.45;
+  border-color: #bdbdbd;
+  background: #f5f5f5;
+  box-shadow: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, opacity 0.2s,
+    transform 0.15s;
+  animation: markFade 0.25s;
+}
+@keyframes markFade {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.45;
+  }
+}
+.character-tile:focus {
+  border-color: #1976d2;
+  box-shadow: 0 0 0 2px #90caf9;
+}
+.marked-overlay {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  color: #b71c1c;
+  font-size: 2.6rem;
+  z-index: 2;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.1);
+}
+.marked-overlay.center {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.7);
+  z-index: 2;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.marked-icon {
+  font-size: 2.2rem;
+}
+.marked-icon {
+  font-size: 3.5rem;
+  color: #b71c1c;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.12));
+}
+.character-img {
+  border-radius: 50%;
+  box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.08);
+  margin-bottom: 0.5rem;
+  background: #f5f7fa;
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+}
+.character-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1a237e;
+  margin-top: 0.35rem;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 2px #fff;
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  border: 0;
+}
