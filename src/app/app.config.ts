@@ -1,10 +1,15 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
+import {
+  ApplicationConfig,
+  provideBrowserGlobalErrorListeners,
+  provideZoneChangeDetection,
+} from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
-import { provideDatabase, getDatabase } from '@angular/fire/database';
-import { environment } from '../environments/environment';
 
 import { routes } from './app.routes';
+import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
+import { getDatabase, provideDatabase } from '@angular/fire/database';
+import { getStorage, provideStorage } from '@angular/fire/storage';
+import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -12,6 +17,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideFirebaseApp(() => initializeApp(environment.firebase)),
-    provideDatabase(() => getDatabase())
-  ]
+    provideDatabase(() => getDatabase()),
+    provideStorage(() => getStorage()),
+  ],
 };

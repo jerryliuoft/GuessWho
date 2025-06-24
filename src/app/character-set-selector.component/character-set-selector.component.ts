@@ -3,13 +3,16 @@ import {
   ChangeDetectionStrategy,
   Output,
   EventEmitter,
-  signal,
-  computed,
+  inject,
 } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
+import { CharacterSetService } from '../character-set.service';
+import { CustomCharacterSetUploadComponent } from '../custom-character-set-upload.component/custom-character-set-upload.component';
 
 export interface CharacterSet {
   name: string;
@@ -122,30 +125,27 @@ const DEMO_SET: CharacterSet = {
   styleUrls: ['./character-set-selector.component.scss'],
 })
 export class CharacterSetSelectorComponent {
-  private _sets = signal<CharacterSet[]>([
-    DEMO_SET,
-    { name: 'Classic', characters: [] },
-    { name: 'Custom', characters: [] },
-  ]);
-  private _selectedSet = signal<CharacterSet | null>(DEMO_SET);
+  private dialog = inject(MatDialog);
+  private characterSetService = inject(CharacterSetService);
+
+  sets = this.characterSetService.getCharacterSets();
+  private _selectedSet = DEMO_SET;
 
   @Output() output = new EventEmitter<CharacterSet>();
 
-  sets = computed(() => this._sets());
-
   onSetChange(event: any) {
-    const set = this._sets().find((s) => s.name === event.value);
+    const set = this.sets().find((s) => s.name === event.value);
     if (set) {
-      this._selectedSet.set(set);
+      this._selectedSet = set;
       this.output.emit(set);
     }
   }
 
-  onFileUpload(event: Event) {
-    // TODO: Implement file upload logic for custom sets
-  }
-
-  onBrowseAll() {
-    // TODO: Implement browse all action (e.g., open a dialog or navigate to a browse page)
+  onCreateCustomSet() {
+    this.dialog.open(CustomCharacterSetUploadComponent, {
+      width: '600px',
+      disableClose: false,
+      autoFocus: true,
+    });
   }
 }
