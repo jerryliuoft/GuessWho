@@ -9,6 +9,7 @@ import { NgOptimizedImage } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatRippleModule } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
+import { CommonModule } from '@angular/common';
 
 export interface Character {
   name: string;
@@ -18,7 +19,13 @@ export interface Character {
 @Component({
   selector: 'character-grid',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgOptimizedImage, MatCardModule, MatRippleModule, MatIconModule],
+  imports: [
+    NgOptimizedImage,
+    MatCardModule,
+    MatRippleModule,
+    MatIconModule,
+    CommonModule,
+  ],
   template: `
     <div class="character-grid-toolbar">
       <button
@@ -80,7 +87,15 @@ export interface Character {
         >
           <mat-icon class="target-icon">star</mat-icon>
         </span>
-        }
+        } @if (character.imageUrl.startsWith('data:')) {
+        <img
+          [attr.src]="character.imageUrl"
+          width="100"
+          height="100"
+          alt="{{ character.name }}"
+          class="character-img"
+        />
+        } @else {
         <img
           [ngSrc]="character.imageUrl"
           width="100"
@@ -88,6 +103,7 @@ export interface Character {
           alt="{{ character.name }}"
           class="character-img"
         />
+        }
         <div class="character-name">{{ character.name }}</div>
       </mat-card>
       }

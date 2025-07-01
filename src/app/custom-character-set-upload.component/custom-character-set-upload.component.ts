@@ -12,42 +12,57 @@ import {
   CustomCharacterSetService,
   Character,
 } from '../custom-character-set.service';
+import { MatButtonModule } from '@angular/material/button';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-custom-character-set-upload',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, MatButtonModule, CommonModule],
   template: `
     <form [formGroup]="form" (ngSubmit)="onUpload()" class="upload-form">
-      <label>
-        Set Name:
-        <input formControlName="setName" required />
-      </label>
-      <label>
-        Characters:
+      <h2 class="dialog-title">Upload Custom Character Set</h2>
+      <div class="form-group">
+        <label for="setName">Set Name</label>
+        <input id="setName" formControlName="setName" required />
+      </div>
+      <div class="form-group">
+        <label for="characterFiles">Characters</label>
         <input
+          id="characterFiles"
           type="file"
           multiple
           (change)="onFilesSelected($event)"
           accept="image/*"
         />
-      </label>
-      <div class="character-list">
-        @for (char of characters(); track char.name) {
-        <div>{{ char.name }}</div>
-        }
       </div>
-      <button type="submit" [disabled]="form.invalid || loading()">
-        Upload
-      </button>
+      <div class="character-list">
+        @if (characters().length > 0) {
+        <div class="character-list-title">Selected Characters:</div>
+        @for (char of characters(); track char.name) {
+        <div class="character-item">{{ char.name }}</div>
+        } }
+      </div>
+      <div class="button-row">
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          [disabled]="form.invalid || loading()"
+        >
+          Upload
+        </button>
+        <button mat-button type="button" (click)="onCancel()">Cancel</button>
+      </div>
       @if (loading()) {
-      <div>Uploading...</div>
+      <div class="status-message">Uploading...</div>
       } @if (error()) {
-      <div>{{ error() }}</div>
+      <div class="status-message error">{{ error() }}</div>
       }
     </form>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrls: ['./custom-character-set-upload.component.scss'],
 })
 export class CustomCharacterSetUploadComponent {
   private fb = inject(FormBuilder);
@@ -84,9 +99,15 @@ export class CustomCharacterSetUploadComponent {
       );
       this.dialogRef.close(true);
     } catch (err) {
+      // Print error to console for debugging
+      console.error('Upload failed:', err);
       this.error.set('Upload failed. Please try again.');
     } finally {
       this.loading.set(false);
     }
+  }
+
+  onCancel() {
+    this.dialogRef.close(false);
   }
 }

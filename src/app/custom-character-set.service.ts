@@ -1,11 +1,5 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Database, ref, set, push } from '@angular/fire/database';
-import {
-  Storage,
-  ref as storageRef,
-  uploadBytes,
-  getDownloadURL,
-} from '@angular/fire/storage';
 
 export interface Character {
   name: string;
@@ -14,34 +8,42 @@ export interface Character {
 
 export interface CharacterSet {
   name: string;
-  characters: Array<{ name: string; imageUrl: string }>;
+  characters: Array<{ name: string; imageDataUrl: string }>;
 }
 
 @Injectable({ providedIn: 'root' })
 export class CustomCharacterSetService {
-  private db = inject(Database);
-  private storage = inject(Storage);
+  constructor(private db: Database) {}
 
   async uploadCharacterSet(
     setName: string,
     characters: Character[]
   ): Promise<void> {
-    // Upload all images and get their URLs
-    const uploadedCharacters = await Promise.all(
-      characters.map(async (character) => {
-        const imgPath = `character-sets/${setName}/${character.name}`;
-        const imgRef = storageRef(this.storage, imgPath);
-        await uploadBytes(imgRef, character.imageFile);
-        const imageUrl = await getDownloadURL(imgRef);
-        return { name: character.name, imageUrl };
-      })
-    );
-    // Save the character set to the database
-    const setRef = push(ref(this.db, 'characterSets'));
-    const characterSet: CharacterSet = {
-      name: setName,
-      characters: uploadedCharacters,
-    };
-    await set(setRef, characterSet);
+    try {
+      const uploadedCharacters = await Promise.all(
+        characters.map(async (character) => {
+          const imageDataUrl = await this.fileToDataUrl(character.imageFile);
+          return { name: character.name, imageDataUrl };
+        })
+      );
+      const setRef = push(ref(this.db, 'characterSets'));
+      const characterSet: CharacterSet = {
+        name: setName,
+        characters: uploadedCharacters,
+      };
+      await set(setRef, characterSet);
+    } catch (err) {
+      console.error('Upload failed:', err);
+      throw err;
+    }
+  }
+
+  private fileToDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
   }
 }
