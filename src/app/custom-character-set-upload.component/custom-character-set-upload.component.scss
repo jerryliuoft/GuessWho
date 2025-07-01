@@ -23,6 +23,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  position: relative;
 }
 
 .form-group label {
@@ -54,6 +55,8 @@ input[type="file"] {
   gap: 1rem;
   justify-content: flex-end;
   margin-top: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .status-message {
@@ -80,4 +83,118 @@ input[type="file"] {
   outline: none;
   border-color: #3f51b5;
   background: #fff;
+}
+
+.form-group button[type="button"] {
+  margin-top: 0.25rem;
+  width: fit-content;
+}
+
+.file-count {
+  margin-left: 1rem;
+  font-size: 0.95rem;
+  color: #666;
+  align-self: center;
+}
+
+.crop-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin-top: 1rem;
+  justify-items: center;
+  align-items: start;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (min-width: 600px) {
+  .crop-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+}
+
+.crop-grid-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 320px;
+  background: #fafafa;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  padding: 1.5rem 1rem 1rem 1rem;
+  box-sizing: border-box;
+  margin: 0 auto;
+}
+
+.crop-grid-item .character-name {
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  text-align: center;
+  font-weight: 500;
+}
+
+.character-name-field {
+  margin-top: 1.25rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.fullscreen-upload-form {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: #fff;
+  width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
+  overflow-y: auto;
+  padding: 2.5rem 4vw 2rem 4vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  margin: 0 auto;
+}
+
+@media (max-width: 900px) {
+  .fullscreen-upload-form {
+    padding: 1.5rem 3vw 1.5rem 3vw;
+    width: 100vw;
+    max-width: 100vw;
+  }
+}
+
+.character-cropper {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-width: 320px;
+  max-height: 320px;
+  display: block;
+  margin: 0 auto 0.5rem auto;
+}
+
+.character-cropper img,
+.character-cropper canvas {
+  object-fit: contain !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+  background: #fff;
+}
+
+.mat-form-field {
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .button-row {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: stretch;
+  }
 }

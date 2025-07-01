@@ -16,13 +16,15 @@ export class CharacterSetService {
     onValue(setsRef, (snapshot) => {
       const val = snapshot.val();
       if (val) {
-        // Convert imageDataUrl to imageUrl for compatibility
+        // Defensive: ensure set.characters is always an array
         const arr = Object.values(val).map((set: any) => ({
           ...set,
-          characters: set.characters.map((c: any) => ({
-            name: c.name,
-            imageUrl: c.imageDataUrl ?? c.imageUrl ?? '',
-          })),
+          characters: Array.isArray(set.characters)
+            ? set.characters.map((c: any) => ({
+                name: c.name,
+                imageUrl: c.imageDataUrl ?? c.imageUrl ?? '',
+              }))
+            : [],
         })) as CharacterSet[];
         this.sets.set(arr);
       } else {
