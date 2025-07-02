@@ -5,11 +5,9 @@ import {
   inject,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatDialogRef } from '@angular/material/dialog';
-import {
-  CustomCharacterSetService,
-  Character,
-} from '../custom-character-set.service';
+// Removed MatDialogRef: not needed for routed component
+import { CustomCharacterSetService } from '../custom-character-set.service';
+import { Character } from '../models/character.model';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -18,6 +16,7 @@ import { CommonModule } from '@angular/common';
 import { ImageCropperComponent, ImageCroppedEvent } from 'ngx-image-cropper';
 
 import { NgOptimizedImage } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-custom-character-set-upload',
@@ -234,7 +233,7 @@ import { NgOptimizedImage } from '@angular/common';
 export class CustomCharacterSetUploadComponent {
   private fb = inject(FormBuilder);
   private service = inject(CustomCharacterSetService);
-  private dialogRef = inject(MatDialogRef<CustomCharacterSetUploadComponent>);
+  private router = inject(Router);
 
   form = this.fb.group({
     setName: ['', Validators.required],
@@ -436,17 +435,17 @@ export class CustomCharacterSetUploadComponent {
     this.loading.set(true);
     this.error.set(null);
     try {
-      const characters = states
+      const characters: Character[] = states
         .filter((s) => s.croppedDataUrl)
         .map((s) => ({
           name: s.name,
-          imageDataUrl: s.croppedDataUrl!,
+          imageUrl: s.croppedDataUrl!,
         }));
       await this.service.uploadCharacterSet(
         this.form.value.setName!,
         characters
       );
-      this.dialogRef.close(true);
+      this.router.navigateByUrl('/');
     } catch (err) {
       console.error('Upload failed:', err);
       this.error.set('Upload failed. Please try again.');
@@ -456,7 +455,7 @@ export class CustomCharacterSetUploadComponent {
   }
 
   onCancel() {
-    this.dialogRef.close(false);
+    this.router.navigateByUrl('/');
   }
 }
 

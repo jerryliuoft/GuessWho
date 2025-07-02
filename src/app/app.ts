@@ -6,14 +6,10 @@ import {
   ViewChild,
   AfterViewInit,
 } from '@angular/core';
-import {
-  CharacterGridComponent,
-  Character,
-} from './character-grid.component/character-grid.component';
-import {
-  CharacterSetSelectorComponent,
-  CharacterSet,
-} from './character-set-selector.component/character-set-selector.component';
+import { CharacterGridComponent } from './character-grid.component/character-grid.component';
+import { CharacterSetSelectorComponent } from './character-set-selector.component/character-set-selector.component';
+import { CharacterSet } from './models/character.model';
+import { DEMO_SET } from './models/character.model';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -21,6 +17,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDialogModule } from '@angular/material/dialog';
+import { YourCharacterComponent } from './your-character.component';
+import { ToastComponent } from './toast.component';
+import { ToastService } from './toast.service';
+import { inject } from '@angular/core';
+import { GameService } from './game.service';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -28,6 +30,8 @@ import { MatDialogModule } from '@angular/material/dialog';
   imports: [
     CharacterSetSelectorComponent,
     CharacterGridComponent,
+    YourCharacterComponent,
+    ToastComponent,
     MatCardModule,
     MatDividerModule,
     MatToolbarModule,
@@ -35,35 +39,32 @@ import { MatDialogModule } from '@angular/material/dialog';
     MatIconModule,
     MatSelectModule,
     MatDialogModule,
+    RouterOutlet,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
-export class App implements AfterViewInit {
-  private _characters = signal<Character[]>([]);
-  private _targetCharacter = signal<Character | null>(null);
+export class App {
+  toast = new ToastService();
+  gameService = inject(GameService);
 
-  @ViewChild('grid') gridComponent?: CharacterGridComponent;
-
-  characters = computed(() => this._characters());
-  targetCharacter = computed(() => this._targetCharacter());
-
-  ngAfterViewInit() {
-    if (this.gridComponent) {
-      this.gridComponent.input(this._characters());
-    }
+  constructor() {
+    // Load default character set on app start
+    this.gameService.loadSet(DEMO_SET);
   }
 
   onSetSelected(set: CharacterSet) {
-    this._characters.set(set.characters);
-    if (set.characters.length > 0) {
-      const randomIdx = Math.floor(Math.random() * set.characters.length);
-      this._targetCharacter.set(set.characters[randomIdx]);
-    } else {
-      this._targetCharacter.set(null);
-    }
-    if (this.gridComponent) {
-      this.gridComponent.input(set.characters);
-    }
+    this.gameService.loadSet(set);
+  }
+
+  /**
+   * Returns true if the current route is a full-page routed view (e.g. /create-set),
+   * so the main game UI should be hidden and only the routed content shown.
+   * This is used to keep the layout consistent and avoid duplicate content.
+   */
+  isRoutedPage(): boolean {
+    // Simple check: if the current URL is /create-set, hide the main game UI
+    // (You can expand this logic for more routed pages in the future)
+    return window.location.pathname.startsWith('/create-set');
   }
 }

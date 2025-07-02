@@ -10,15 +10,15 @@
     </mat-form-field>
   </div>
   <div class="set-selector-right">
-    <button
+    <a
       mat-raised-button
       color="primary"
       class="browse-btn"
-      type="button"
-      (click)="onCreateCustomSet()"
+      routerLink="/create-set"
+      style="text-decoration: none"
     >
-      <mat-icon>search</mat-icon>
+      <mat-icon>upload_file</mat-icon>
       Upload Custom Set
-    </button>
+    </a>
   </div>
 </form>

@@ -1,10 +1,8 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Database, ref, onValue } from '@angular/fire/database';
+import { CharacterSet } from './models/character.model';
 
-export interface CharacterSet {
-  name: string;
-  characters: { name: string; imageUrl: string }[];
-}
+// DEMO_SET is now defined and exported from models/character.model.ts
 
 @Injectable({ providedIn: 'root' })
 export class CharacterSetService {
@@ -22,7 +20,7 @@ export class CharacterSetService {
           characters: Array.isArray(set.characters)
             ? set.characters.map((c: any) => ({
                 name: c.name,
-                imageUrl: c.imageDataUrl ?? c.imageUrl ?? '',
+                imageUrl: c.imageUrl ?? '',
               }))
             : [],
         })) as CharacterSet[];

@@ -5,20 +5,27 @@
 
 <main class="app-container">
   <mat-card class="game-card">
-    <div class="set-selector-row">
-      <character-set-selector
-        (output)="onSetSelected($event)"
-      ></character-set-selector>
-    </div>
-    <mat-divider class="divider"></mat-divider>
-    <section class="character-grid-section">
-      <character-grid #grid [target]="targetCharacter()"></character-grid>
-    </section>
+    <router-outlet></router-outlet>
+    @if (!isRoutedPage()) {
+      <div class="set-selector-row">
+        <character-set-selector
+          (output)="onSetSelected($event)"
+        ></character-set-selector>
+      </div>
+      <your-character
+        [character]="gameService.mysteryCharacter()"
+      ></your-character>
+      <mat-divider class="divider"></mat-divider>
+      <section class="character-grid-section">
+        <character-grid></character-grid>
+      </section>
+    }
   </mat-card>
   <footer class="app-footer">
-    <span
-      >Invite your friend to play on their device. Each player selects their own
-      character set and grid.</span
-    >
+    <span>
+      Use this grid to track your game. Your friend is guessing the character
+      marked with a star.
+    </span>
   </footer>
+  <app-toast></app-toast>
 </main>

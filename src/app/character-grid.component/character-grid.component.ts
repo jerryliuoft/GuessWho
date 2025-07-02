@@ -1,20 +1,18 @@
 import {
   Component,
   ChangeDetectionStrategy,
-  signal,
-  computed,
   input,
+  inject,
+  computed,
 } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatRippleModule } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
+import { GameService } from '../game.service';
 
-export interface Character {
-  name: string;
-  imageUrl: string;
-}
+// Character now imported from models
 
 @Component({
   selector: 'character-grid',
@@ -39,47 +37,61 @@ export interface Character {
       <button
         type="button"
         class="sort-toggle-btn"
-        (click)="toggleSortUnmarkedFirst()"
-        [attr.aria-pressed]="sortUnmarkedFirst()"
+        (click)="
+          game.sortUnmarkedFirst() ? game.toggleSort() : game.toggleSort()
+        "
+        [attr.aria-pressed]="game.sortUnmarkedFirst()"
         [title]="
-          sortUnmarkedFirst() ? 'Show marked at end' : 'Show original order'
+          game.sortUnmarkedFirst()
+            ? 'Show marked at end'
+            : 'Show original order'
         "
       >
         <mat-icon>{{
-          sortUnmarkedFirst() ? 'filter_alt' : 'filter_alt_off'
+          game.sortUnmarkedFirst() ? 'filter_alt' : 'filter_alt_off'
         }}</mat-icon>
-        {{ sortUnmarkedFirst() ? 'Unmarked First' : 'Original Order' }}
+        {{ game.sortUnmarkedFirst() ? 'Unmarked First' : 'Original Order' }}
       </button>
       <span class="remaining-count" aria-live="polite">
-        {{ characters().length - markedCount() }} remaining
+        {{ game.sortedCharacters().length - game.marked().size }} remaining
       </span>
     </div>
     <div class="character-grid">
-      @for (character of characters(); track character.name) {
+      @for (character of game.sortedCharacters(); track character.name) {
       <mat-card
         class="character-tile"
-        [class.marked]="isMarked(character)"
-        [class.target-tile]="target() && character.name === target()?.name"
-        (click)="toggleMark(character)"
-        (keydown.enter)="toggleMark(character)"
-        (keydown.space)="toggleMark(character)"
+        [class.marked]="game.isMarked(character)"
+        [class.target-tile]="
+          game.mysteryCharacter() &&
+          character.name === game.mysteryCharacter()?.name
+        "
+        (click)="game.toggleMark(character)"
+        (keydown.enter)="game.toggleMark(character)"
+        (keydown.space)="game.toggleMark(character)"
         matRipple
-        [matRippleColor]="isMarked(character) ? '#bdbdbd' : '#e0e7ef'"
+        [matRippleColor]="game.isMarked(character) ? '#bdbdbd' : '#e0e7ef'"
         tabindex="0"
         role="button"
-        [attr.aria-pressed]="isMarked(character)"
+        [attr.aria-pressed]="game.isMarked(character)"
         [attr.aria-label]="
           character.name +
-          (isMarked(character) ? ' (marked as eliminated)' : '') +
-          (target() && character.name === target()?.name
+          (game.isMarked(character) ? ' (marked as eliminated)' : '') +
+          (game.mysteryCharacter() &&
+          character.name === game.mysteryCharacter()?.name
             ? ' (target character)'
             : '')
         "
         [attr.title]="character.name"
       >
-        @if (isMarked(character)) {
+        @if (game.isMarked(character)) {
         <span class="visually-hidden">Marked as eliminated</span>
-        } @if (target() && character.name === target()?.name) {
+        <span class="marked-overlay" aria-hidden="true">
+          <mat-icon class="marked-icon" fontIcon="cancel" aria-hidden="true"
+            >cancel</mat-icon
+          >
+        </span>
+        } @if (game.mysteryCharacter() && character.name ===
+        game.mysteryCharacter()?.name) {
         <span
           class="target-indicator"
           aria-label="Target character"
@@ -102,6 +114,7 @@ export interface Character {
           height="100"
           alt="{{ character.name }}"
           class="character-img"
+          [attr.priority]="isLCP(character) ? '' : null"
         />
         }
         <div class="character-name">{{ character.name }}</div>
@@ -112,51 +125,15 @@ export interface Character {
   styleUrls: ['./character-grid.component.scss'],
 })
 export class CharacterGridComponent {
-  target = input<Character | null>();
-
-  private _characters = signal<Character[]>([]);
-  private _marked = signal<Set<string>>(new Set());
-  private _sortUnmarkedFirst = signal(true);
-
-  input(characters: Character[]) {
-    this._characters.set(characters);
-    this._marked.set(new Set()); // Reset marks when new set is loaded
-  }
-
-  sortUnmarkedFirst = computed(() => this._sortUnmarkedFirst());
-
-  toggleSortUnmarkedFirst() {
-    this._sortUnmarkedFirst.set(!this._sortUnmarkedFirst());
-  }
-
-  characters = computed(() => {
-    const chars = this._characters();
-    if (!this._sortUnmarkedFirst()) return chars;
-    const marked = this._marked();
-    return [...chars].sort((a, b) => {
-      const aMarked = marked.has(a.name);
-      const bMarked = marked.has(b.name);
-      if (aMarked === bMarked) return 0;
-      return aMarked ? 1 : -1;
-    });
-  });
-  markedCount = computed(() => this._marked().size);
-
-  isMarked(character: Character): boolean {
-    return this._marked().has(character.name);
-  }
-
-  toggleMark(character: Character) {
-    const marked = new Set(this._marked());
-    if (marked.has(character.name)) {
-      marked.delete(character.name);
-    } else {
-      marked.add(character.name);
-    }
-    this._marked.set(marked);
-  }
+  game = inject(GameService);
 
   resetMarks() {
-    this._marked.set(new Set());
+    this.game
+      .marked()
+      .forEach((name) => this.game.toggleMark({ name, imageUrl: '' }));
+  }
+
+  isLCP(character: any): boolean {
+    return this.game.sortedCharacters()[0]?.name === character.name;
   }
 }

@@ -1,15 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Database, ref, set, push } from '@angular/fire/database';
-
-export interface Character {
-  name: string;
-  imageDataUrl: string;
-}
-
-export interface CharacterSet {
-  name: string;
-  characters: Array<{ name: string; imageDataUrl: string }>;
-}
+import { Character, CharacterSet } from './models/character.model';
 
 @Injectable({ providedIn: 'root' })
 export class CustomCharacterSetService {
