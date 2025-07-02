@@ -31,57 +31,53 @@ import { Router } from '@angular/router';
     NgOptimizedImage,
   ],
   template: `
-    <form
-      [formGroup]="form"
-      (ngSubmit)="onUpload()"
-      class="upload-form fullscreen-upload-form"
-    >
-      <h2 class="dialog-title">Upload Custom Character Set</h2>
-      <div class="mode-toggle">
-        <button
-          type="button"
-          [class.selected]="mode() === 'upload'"
-          (click)="mode.set('upload')"
-        >
-          Upload Images
-        </button>
-        <button
-          type="button"
-          [class.selected]="mode() === 'search'"
-          (click)="mode.set('search')"
-        >
-          Search Anime Characters
-        </button>
-      </div>
-      <div class="form-group">
-        <label for="setName">Set Name</label>
-        <input id="setName" formControlName="setName" required />
-      </div>
-      @if (mode() === 'upload') {
-      <div class="form-group">
-        <label for="characterFiles">Characters</label>
-        <input
-          id="characterFiles"
-          type="file"
-          multiple
-          (change)="onFilesSelected($event)"
-          accept="image/*"
-          #fileInput
-          style="display: none;"
-        />
-        <button
-          mat-raised-button
-          color="accent"
-          type="button"
-          (click)="fileInput.click()"
-        >
-          Choose Files
-        </button>
-        <span class="file-count" *ngIf="cropStates().length > 0"
-          >{{ cropStates().length }} file(s) selected</span
-        >
-      </div>
-      <div class="character-list">
+    <main class="custom-set-upload-page">
+      <h2 class="page-title">Upload Custom Character Set</h2>
+      <form [formGroup]="form" (ngSubmit)="onUpload()" class="upload-form">
+        <div class="mode-toggle">
+          <button
+            type="button"
+            [class.selected]="mode() === 'upload'"
+            (click)="mode.set('upload')"
+          >
+            Upload Images
+          </button>
+          <button
+            type="button"
+            [class.selected]="mode() === 'search'"
+            (click)="mode.set('search')"
+          >
+            Search Anime Characters
+          </button>
+        </div>
+        <div class="form-group">
+          <label for="setName">Set Name</label>
+          <input id="setName" formControlName="setName" required />
+        </div>
+        @if (mode() === 'upload') {
+        <div class="form-group">
+          <label for="characterFiles">Characters</label>
+          <input
+            id="characterFiles"
+            type="file"
+            multiple
+            (change)="onFilesSelected($event)"
+            accept="image/*"
+            #fileInput
+            style="display: none;"
+          />
+          <button
+            mat-raised-button
+            color="accent"
+            type="button"
+            (click)="fileInput.click()"
+          >
+            Choose Files
+          </button>
+          <span class="file-count" *ngIf="cropStates().length > 0"
+            >{{ cropStates().length }} file(s) selected</span
+          >
+        </div>
         @if (cropStates().length > 0) {
         <div class="character-list-title">Crop and Preview Characters:</div>
         <div class="crop-grid">
@@ -115,59 +111,58 @@ import { Router } from '@angular/router';
           </div>
           }
         </div>
-        }
-      </div>
-      } @if (mode() === 'search') {
-      <div class="search-section">
-        <label for="searchInput">Search Characters</label>
-        <input
-          id="searchInput"
-          type="text"
-          [value]="searchQuery()"
-          (input)="onSearchInput($event)"
-          (keydown.enter)="onSearch()"
-          placeholder="e.g. Naruto"
-          autocomplete="off"
-        />
-        <button
-          mat-raised-button
-          color="accent"
-          type="button"
-          (click)="onSearch()"
-          [disabled]="searching() || !searchQuery().trim()"
-        >
-          Search
-        </button>
-        @if (searching()) {
-        <span class="search-status">Searching...</span>
-        } @if (searchError()) {
-        <span class="search-status error">{{ searchError() }}</span>
-        }
-        <div class="search-results">
-          @for (char of searchResults(); track char.mal_id) {
-          <div
-            class="search-result-item"
-            [class.selected]="isSelectedSearchResult(char.mal_id)"
-            (click)="onSelectSearchResult(char)"
-            tabindex="0"
-            role="button"
-            [attr.aria-pressed]="isSelectedSearchResult(char.mal_id)"
+        } } @if (mode() === 'search') {
+        <div class="search-section">
+          <label for="searchInput">Search Characters</label>
+          <input
+            id="searchInput"
+            type="text"
+            [value]="searchQuery()"
+            (input)="onSearchInput($event)"
+            (keydown.enter)="onSearch()"
+            placeholder="e.g. Naruto"
+            autocomplete="off"
+          />
+          <button
+            mat-raised-button
+            color="accent"
+            type="button"
+            (click)="onSearch()"
+            [disabled]="searching() || !searchQuery().trim()"
           >
-            <img
-              [ngSrc]="
-                char.images.jpg?.image_url || char.images.webp?.image_url || ''
-              "
-              width="80"
-              height="80"
-              [attr.alt]="char.name"
-              loading="lazy"
-            />
-            <div class="search-result-name">{{ char.name }}</div>
-          </div>
+            Search
+          </button>
+          @if (searching()) {
+          <span class="search-status">Searching...</span>
+          } @if (searchError()) {
+          <span class="search-status error">{{ searchError() }}</span>
           }
+          <div class="search-results">
+            @for (char of searchResults(); track char.mal_id) {
+            <div
+              class="search-result-item"
+              [class.selected]="isSelectedSearchResult(char.mal_id)"
+              (click)="onSelectSearchResult(char)"
+              tabindex="0"
+              role="button"
+              [attr.aria-pressed]="isSelectedSearchResult(char.mal_id)"
+            >
+              <img
+                [ngSrc]="
+                  char.images.jpg?.image_url ||
+                  char.images.webp?.image_url ||
+                  ''
+                "
+                width="80"
+                height="80"
+                [attr.alt]="char.name"
+                loading="lazy"
+              />
+              <div class="search-result-name">{{ char.name }}</div>
+            </div>
+            }
+          </div>
         </div>
-      </div>
-      <div class="character-list">
         @if (searchCropStates().length > 0) {
         <div class="character-list-title">Crop and Preview Characters:</div>
         <div class="crop-grid">
@@ -201,31 +196,198 @@ import { Router } from '@angular/router';
           </div>
           }
         </div>
+        } }
+        <div class="button-row">
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="
+              form.invalid ||
+              loading() ||
+              (mode() === 'upload' && cropStates().length === 0) ||
+              (mode() === 'search' && searchCropStates().length === 0)
+            "
+          >
+            Upload
+          </button>
+          <button mat-button type="button" (click)="onCancel()">Cancel</button>
+        </div>
+        @if (loading()) {
+        <div class="status-message">Uploading...</div>
+        } @if (error()) {
+        <div class="status-message error">{{ error() }}</div>
+        }
+      </form>
+    </main>
+    <div class="form-group">
+      <label for="characterFiles">Characters</label>
+      <input
+        id="characterFiles"
+        type="file"
+        multiple
+        (change)="onFilesSelected($event)"
+        accept="image/*"
+        #fileInput
+        style="display: none;"
+      />
+      <button
+        mat-raised-button
+        color="accent"
+        type="button"
+        (click)="fileInput.click()"
+      >
+        Choose Files
+      </button>
+      <span class="file-count" *ngIf="cropStates().length > 0"
+        >{{ cropStates().length }} file(s) selected</span
+      >
+    </div>
+    <div class="character-list">
+      @if (cropStates().length > 0) {
+      <div class="character-list-title">Crop and Preview Characters:</div>
+      <div class="crop-grid">
+        @for (state of cropStates(); track state.id) {
+        <div class="crop-grid-item">
+          <image-cropper
+            [imageBase64]="state.imageBase64"
+            [maintainAspectRatio]="true"
+            [aspectRatio]="1"
+            format="png"
+            [resizeToWidth]="512"
+            [resizeToHeight]="512"
+            (imageCropped)="onImageCropped(state.id, $event)"
+            (imageLoaded)="onImageLoaded(state.id)"
+            class="character-cropper"
+          ></image-cropper>
+          <mat-form-field appearance="outline" class="character-name-field">
+            <input
+              matInput
+              type="text"
+              [value]="state.name"
+              (input)="onCharacterNameInput(state.id, $event)"
+              maxlength="32"
+              class="character-name-input"
+              placeholder="Character name"
+              autocomplete="off"
+              autocapitalize="words"
+              spellcheck="false"
+            />
+          </mat-form-field>
+        </div>
         }
       </div>
       }
-      <div class="button-row">
-        <button
-          mat-raised-button
-          color="primary"
-          type="submit"
-          [disabled]="
-            form.invalid ||
-            loading() ||
-            (mode() === 'upload' && cropStates().length === 0) ||
-            (mode() === 'search' && searchCropStates().length === 0)
-          "
-        >
-          Upload
-        </button>
-        <button mat-button type="button" (click)="onCancel()">Cancel</button>
-      </div>
-      @if (loading()) {
-      <div class="status-message">Uploading...</div>
-      } @if (error()) {
-      <div class="status-message error">{{ error() }}</div>
+    </div>
+    @if (mode() === 'search') {
+    <div class="search-section">
+      <label for="searchInput">Search Characters</label>
+      <input
+        id="searchInput"
+        type="text"
+        [value]="searchQuery()"
+        (input)="onSearchInput($event)"
+        (keydown.enter)="onSearch()"
+        placeholder="e.g. Naruto"
+        autocomplete="off"
+      />
+      <button
+        mat-raised-button
+        color="accent"
+        type="button"
+        (click)="onSearch()"
+        [disabled]="searching() || !searchQuery().trim()"
+      >
+        Search
+      </button>
+      @if (searching()) {
+      <span class="search-status">Searching...</span>
+      } @if (searchError()) {
+      <span class="search-status error">{{ searchError() }}</span>
       }
-    </form>
+      <div class="search-results">
+        @for (char of searchResults(); track char.mal_id) {
+        <div
+          class="search-result-item"
+          [class.selected]="isSelectedSearchResult(char.mal_id)"
+          (click)="onSelectSearchResult(char)"
+          tabindex="0"
+          role="button"
+          [attr.aria-pressed]="isSelectedSearchResult(char.mal_id)"
+        >
+          <img
+            [ngSrc]="
+              char.images.jpg?.image_url || char.images.webp?.image_url || ''
+            "
+            width="80"
+            height="80"
+            [attr.alt]="char.name"
+            loading="lazy"
+          />
+          <div class="search-result-name">{{ char.name }}</div>
+        </div>
+        }
+      </div>
+    </div>
+    <div class="character-list">
+      @if (searchCropStates().length > 0) {
+      <div class="character-list-title">Crop and Preview Characters:</div>
+      <div class="crop-grid">
+        @for (state of searchCropStates(); track state.id) {
+        <div class="crop-grid-item">
+          <image-cropper
+            [imageBase64]="state.imageBase64"
+            [maintainAspectRatio]="true"
+            [aspectRatio]="1"
+            format="png"
+            [resizeToWidth]="512"
+            [resizeToHeight]="512"
+            (imageCropped)="onImageCropped(state.id, $event, true)"
+            (imageLoaded)="onImageLoaded(state.id)"
+            class="character-cropper"
+          ></image-cropper>
+          <mat-form-field appearance="outline" class="character-name-field">
+            <input
+              matInput
+              type="text"
+              [value]="state.name"
+              (input)="onCharacterNameInput(state.id, $event, true)"
+              maxlength="32"
+              class="character-name-input"
+              placeholder="Character name"
+              autocomplete="off"
+              autocapitalize="words"
+              spellcheck="false"
+            />
+          </mat-form-field>
+        </div>
+        }
+      </div>
+      }
+    </div>
+    }
+    <div class="button-row">
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        [disabled]="
+          form.invalid ||
+          loading() ||
+          (mode() === 'upload' && cropStates().length === 0) ||
+          (mode() === 'search' && searchCropStates().length === 0)
+        "
+      >
+        Upload
+      </button>
+      <button mat-button type="button" (click)="onCancel()">Cancel</button>
+    </div>
+    @if (loading()) {
+    <div class="status-message">Uploading...</div>
+    } @if (error()) {
+    <div class="status-message error">{{ error() }}</div>
+    }
+    <!-- form ends here -->
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['./custom-character-set-upload.component.scss'],

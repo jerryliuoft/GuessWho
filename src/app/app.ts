@@ -1,11 +1,4 @@
-import {
-  Component,
-  ChangeDetectionStrategy,
-  signal,
-  computed,
-  ViewChild,
-  AfterViewInit,
-} from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CharacterGridComponent } from './character-grid.component/character-grid.component';
 import { CharacterSetSelectorComponent } from './character-set-selector.component/character-set-selector.component';
 import { CharacterSet } from './models/character.model';
@@ -28,9 +21,6 @@ import { RouterOutlet } from '@angular/router';
   selector: 'app-root',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CharacterSetSelectorComponent,
-    CharacterGridComponent,
-    YourCharacterComponent,
     ToastComponent,
     MatCardModule,
     MatDividerModule,

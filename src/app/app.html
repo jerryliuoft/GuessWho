@@ -4,23 +4,7 @@
 </mat-toolbar>
 
 <main class="app-container">
-  <mat-card class="game-card">
-    <router-outlet></router-outlet>
-    @if (!isRoutedPage()) {
-      <div class="set-selector-row">
-        <character-set-selector
-          (output)="onSetSelected($event)"
-        ></character-set-selector>
-      </div>
-      <your-character
-        [character]="gameService.mysteryCharacter()"
-      ></your-character>
-      <mat-divider class="divider"></mat-divider>
-      <section class="character-grid-section">
-        <character-grid></character-grid>
-      </section>
-    }
-  </mat-card>
+  <router-outlet></router-outlet>
   <footer class="app-footer">
     <span>
       Use this grid to track your game. Your friend is guessing the character

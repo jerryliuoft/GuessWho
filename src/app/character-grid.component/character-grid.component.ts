@@ -99,23 +99,24 @@ import { GameService } from '../game.service';
         >
           <mat-icon class="target-icon">star</mat-icon>
         </span>
-        } @if (character.imageUrl.startsWith('data:')) {
-        <img
-          [attr.src]="character.imageUrl"
-          width="100"
-          height="100"
-          alt="{{ character.name }}"
-          class="character-img"
-        />
-        } @else {
-        <img
-          [ngSrc]="character.imageUrl"
-          width="100"
-          height="100"
-          alt="{{ character.name }}"
-          class="character-img"
-          [attr.priority]="isLCP(character) ? '' : null"
-        />
+        }
+        @if (character.imageUrl && character.imageUrl.startsWith('data:')) {
+          <img
+            [attr.src]="character.imageUrl"
+            width="100"
+            height="100"
+            alt="{{ character.name }}"
+            class="character-img"
+          />
+        } @else if (character.imageUrl) {
+          <img
+            [ngSrc]="character.imageUrl"
+            width="100"
+            height="100"
+            alt="{{ character.name }}"
+            class="character-img"
+            [attr.priority]="isLCP(character) ? '' : null"
+          />
         }
         <div class="character-name">{{ character.name }}</div>
       </mat-card>
