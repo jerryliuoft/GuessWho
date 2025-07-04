@@ -11,6 +11,7 @@ import { Character } from '../models/character.model';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatTabsModule } from '@angular/material/tabs';
 import { CommonModule } from '@angular/common';
 
 import { ImageCropperComponent, ImageCroppedEvent } from 'ngx-image-cropper';
@@ -26,6 +27,7 @@ import { Router } from '@angular/router';
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
+    MatTabsModule,
     CommonModule,
     ImageCropperComponent,
     NgOptimizedImage,
@@ -34,169 +36,159 @@ import { Router } from '@angular/router';
     <main>
       <h2 class="page-title">Upload Custom Character Set</h2>
       <form [formGroup]="form" (ngSubmit)="onUpload()" class="upload-form">
-        <div class="mode-toggle">
-          <button
-            type="button"
-            [class.selected]="mode() === 'upload'"
-            (click)="mode.set('upload')"
-          >
-            Upload Images
-          </button>
-          <button
-            type="button"
-            [class.selected]="mode() === 'search'"
-            (click)="mode.set('search')"
-          >
-            Search Anime Characters
-          </button>
-        </div>
-        <div class="form-group">
-          <label for="setName">Set Name</label>
-          <input id="setName" formControlName="setName" required />
-        </div>
-        @if (mode() === 'upload') {
-        <div class="form-group">
-          <label for="characterFiles">Characters</label>
-          <input
-            id="characterFiles"
-            type="file"
-            multiple
-            (change)="onFilesSelected($event)"
-            accept="image/*"
-            #fileInput
-            style="display: none;"
-          />
-          <button
-            mat-raised-button
-            color="accent"
-            type="button"
-            (click)="fileInput.click()"
-          >
-            Choose Files
-          </button>
-          <span class="file-count" *ngIf="cropStates().length > 0"
-            >{{ cropStates().length }} file(s) selected</span
-          >
-        </div>
-        @if (cropStates().length > 0) {
-        <div class="character-list-title">Crop and Preview Characters:</div>
-        <div class="crop-grid">
-          @for (state of cropStates(); track state.id) {
-          <div class="crop-grid-item">
-            <image-cropper
-              [imageBase64]="state.imageBase64"
-              [maintainAspectRatio]="true"
-              [aspectRatio]="1"
-              format="png"
-              [resizeToWidth]="512"
-              [resizeToHeight]="512"
-              (imageCropped)="onImageCropped(state.id, $event)"
-              (imageLoaded)="onImageLoaded(state.id)"
-              class="character-cropper"
-            ></image-cropper>
-            <mat-form-field appearance="outline" class="character-name-field">
+        <mat-form-field appearance="outline" class="form-group">
+          <mat-label>Set Name</mat-label>
+          <input matInput id="setName" formControlName="setName" required />
+        </mat-form-field>
+        <mat-tab-group [selectedIndex]="tabIndex()" (selectedIndexChange)="onTabChange($event)">
+          <mat-tab label="Upload Images">
+            <div class="form-group">
+              <label for="characterFiles" class="visually-hidden">Characters</label>
               <input
-                matInput
-                type="text"
-                [value]="state.name"
-                (input)="onCharacterNameInput(state.id, $event)"
-                maxlength="32"
-                class="character-name-input"
-                placeholder="Character name"
-                autocomplete="off"
-                autocapitalize="words"
-                spellcheck="false"
+                id="characterFiles"
+                type="file"
+                multiple
+                (change)="onFilesSelected($event)"
+                accept="image/*"
+                #fileInput
+                style="display: none;"
               />
-            </mat-form-field>
-          </div>
-          }
-        </div>
-        } } @if (mode() === 'search') {
-        <div class="search-section">
-          <label for="searchInput">Search Characters</label>
-          <input
-            id="searchInput"
-            type="text"
-            [value]="searchQuery()"
-            (input)="onSearchInput($event)"
-            (keydown.enter)="onSearch()"
-            placeholder="e.g. Naruto"
-            autocomplete="off"
-          />
-          <button
-            mat-raised-button
-            color="accent"
-            type="button"
-            (click)="onSearch()"
-            [disabled]="searching() || !searchQuery().trim()"
-          >
-            Search
-          </button>
-          @if (searching()) {
-          <span class="search-status">Searching...</span>
-          } @if (searchError()) {
-          <span class="search-status error">{{ searchError() }}</span>
-          }
-          <div class="search-results">
-            @for (char of searchResults(); track char.mal_id) {
-            <div
-              class="search-result-item"
-              [class.selected]="isSelectedSearchResult(char.mal_id)"
-              (click)="onSelectSearchResult(char)"
-              tabindex="0"
-              role="button"
-              [attr.aria-pressed]="isSelectedSearchResult(char.mal_id)"
-            >
-              <img
-                [ngSrc]="
-                  char.images.jpg?.image_url ||
-                  char.images.webp?.image_url ||
-                  ''
-                "
-                width="80"
-                height="80"
-                [attr.alt]="char.name"
-                loading="lazy"
-              />
-              <div class="search-result-name">{{ char.name }}</div>
+              <button
+                mat-raised-button
+                color="accent"
+                type="button"
+                (click)="fileInput.click()"
+              >
+                Choose Files
+              </button>
+              @if (cropStates().length > 0) {
+                <span class="file-count">{{ cropStates().length }} file(s) selected</span>
+              }
             </div>
+            @if (cropStates().length > 0) {
+              <div class="character-list-title">Crop and Preview Characters:</div>
+              <div class="crop-grid">
+                @for (state of cropStates(); track state.id) {
+                  <div class="crop-grid-item">
+                    <image-cropper
+                      [imageBase64]="state.imageBase64"
+                      [maintainAspectRatio]="true"
+                      [aspectRatio]="1"
+                      format="png"
+                      [resizeToWidth]="512"
+                      [resizeToHeight]="512"
+                      (imageCropped)="onImageCropped(state.id, $event)"
+                      (imageLoaded)="onImageLoaded(state.id)"
+                      class="character-cropper"
+                    ></image-cropper>
+                    <mat-form-field appearance="outline" class="character-name-field">
+                      <input
+                        matInput
+                        type="text"
+                        [value]="state.name"
+                        (input)="onCharacterNameInput(state.id, $event)"
+                        maxlength="32"
+                        class="character-name-input"
+                        placeholder="Character name"
+                        autocomplete="off"
+                        autocapitalize="words"
+                        spellcheck="false"
+                      />
+                    </mat-form-field>
+                  </div>
+                }
+              </div>
             }
-          </div>
-        </div>
-        @if (searchCropStates().length > 0) {
-        <div class="character-list-title">Crop and Preview Characters:</div>
-        <div class="crop-grid">
-          @for (state of searchCropStates(); track state.id) {
-          <div class="crop-grid-item">
-            <image-cropper
-              [imageBase64]="state.imageBase64"
-              [maintainAspectRatio]="true"
-              [aspectRatio]="1"
-              format="png"
-              [resizeToWidth]="512"
-              [resizeToHeight]="512"
-              (imageCropped)="onImageCropped(state.id, $event, true)"
-              (imageLoaded)="onImageLoaded(state.id)"
-              class="character-cropper"
-            ></image-cropper>
-            <mat-form-field appearance="outline" class="character-name-field">
-              <input
-                matInput
-                type="text"
-                [value]="state.name"
-                (input)="onCharacterNameInput(state.id, $event, true)"
-                maxlength="32"
-                class="character-name-input"
-                placeholder="Character name"
-                autocomplete="off"
-                autocapitalize="words"
-                spellcheck="false"
-              />
-            </mat-form-field>
-          </div>
-          }
-        </div>
-        } }
+          </mat-tab>
+          <mat-tab label="Search Anime Characters">
+            <div class="search-section">
+              <mat-form-field appearance="outline">
+                <mat-label>Search Characters</mat-label>
+                <input
+                  matInput
+                  id="searchInput"
+                  type="text"
+                  [value]="searchQuery()"
+                  (input)="onSearchInput($event)"
+                  (keydown.enter)="onSearch()"
+                  placeholder="e.g. Naruto"
+                  autocomplete="off"
+                />
+              </mat-form-field>
+              <button
+                mat-raised-button
+                color="accent"
+                type="button"
+                (click)="onSearch()"
+                [disabled]="searching() || !searchQuery().trim()"
+              >
+                Search
+              </button>
+              @if (searching()) {
+                <span class="search-status">Searching...</span>
+              } @else {
+                @if (searchError()) {
+                  <span class="search-status error">{{ searchError() }}</span>
+                }
+              }
+              <div class="search-results">
+                @for (char of searchResults(); track char.mal_id) {
+                  <div
+                    class="search-result-item"
+                    [class.selected]="isSelectedSearchResult(char.mal_id)"
+                    (click)="onSelectSearchResult(char)"
+                    tabindex="0"
+                    role="button"
+                    [attr.aria-pressed]="isSelectedSearchResult(char.mal_id)"
+                  >
+                    <img
+                      [ngSrc]="char.images.jpg?.image_url || char.images.webp?.image_url || ''"
+                      width="80"
+                      height="80"
+                      [attr.alt]="char.name"
+                      loading="lazy"
+                    />
+                    <div class="search-result-name">{{ char.name }}</div>
+                  </div>
+                }
+              </div>
+            </div>
+            @if (searchCropStates().length > 0) {
+              <div class="character-list-title">Crop and Preview Characters:</div>
+              <div class="crop-grid">
+                @for (state of searchCropStates(); track state.id) {
+                  <div class="crop-grid-item">
+                    <image-cropper
+                      [imageBase64]="state.imageBase64"
+                      [maintainAspectRatio]="true"
+                      [aspectRatio]="1"
+                      format="png"
+                      [resizeToWidth]="512"
+                      [resizeToHeight]="512"
+                      (imageCropped)="onImageCropped(state.id, $event, true)"
+                      (imageLoaded)="onImageLoaded(state.id)"
+                      class="character-cropper"
+                    ></image-cropper>
+                    <mat-form-field appearance="outline" class="character-name-field">
+                      <input
+                        matInput
+                        type="text"
+                        [value]="state.name"
+                        (input)="onCharacterNameInput(state.id, $event, true)"
+                        maxlength="32"
+                        class="character-name-input"
+                        placeholder="Character name"
+                        autocomplete="off"
+                        autocapitalize="words"
+                        spellcheck="false"
+                      />
+                    </mat-form-field>
+                  </div>
+                }
+              </div>
+            }
+          </mat-tab>
+        </mat-tab-group>
         <div class="button-row">
           <button
             mat-raised-button
@@ -214,15 +206,12 @@ import { Router } from '@angular/router';
           <button mat-button type="button" (click)="onCancel()">Cancel</button>
         </div>
         @if (loading()) {
-        <div class="status-message">Uploading...</div>
+          <div class="status-message">Uploading...</div>
         } @if (error()) {
-        <div class="status-message error">{{ error() }}</div>
+          <div class="status-message error">{{ error() }}</div>
         }
       </form>
     </main>
-    <!-- Removed duplicate Choose Files button and file input -->
-    <!-- Removed duplicate character list and search section markup -->
-    <!-- Removed duplicate button row and status messages -->
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['./custom-character-set-upload.component.scss'],
@@ -241,6 +230,13 @@ export class CustomCharacterSetUploadComponent {
   characters = signal<Character[]>([]);
   loading = signal(false);
   error = signal<string | null>(null);
+
+  tabIndex = signal(0);
+
+  onTabChange(index: number) {
+    this.tabIndex.set(index);
+    this.mode.set(index === 0 ? 'upload' : 'search');
+  }
 
   // Upload mode state
   cropStates = signal<
