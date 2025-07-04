@@ -40,10 +40,15 @@ import { Router } from '@angular/router';
           <mat-label>Set Name</mat-label>
           <input matInput id="setName" formControlName="setName" required />
         </mat-form-field>
-        <mat-tab-group [selectedIndex]="tabIndex()" (selectedIndexChange)="onTabChange($event)">
+        <mat-tab-group
+          [selectedIndex]="tabIndex()"
+          (selectedIndexChange)="onTabChange($event)"
+        >
           <mat-tab label="Upload Images">
             <div class="form-group">
-              <label for="characterFiles" class="visually-hidden">Characters</label>
+              <label for="characterFiles" class="visually-hidden"
+                >Characters</label
+              >
               <input
                 id="characterFiles"
                 type="file"
@@ -62,130 +67,154 @@ import { Router } from '@angular/router';
                 Choose Files
               </button>
               @if (cropStates().length > 0) {
-                <span class="file-count">{{ cropStates().length }} file(s) selected</span>
+              <span class="file-count"
+                >{{ cropStates().length }} file(s) selected</span
+              >
               }
             </div>
             @if (cropStates().length > 0) {
-              <div class="character-list-title">Crop and Preview Characters:</div>
-              <div class="crop-grid">
-                @for (state of cropStates(); track state.id) {
-                  <div class="crop-grid-item">
-                    <image-cropper
-                      [imageBase64]="state.imageBase64"
-                      [maintainAspectRatio]="true"
-                      [aspectRatio]="1"
-                      format="png"
-                      [resizeToWidth]="512"
-                      [resizeToHeight]="512"
-                      (imageCropped)="onImageCropped(state.id, $event)"
-                      (imageLoaded)="onImageLoaded(state.id)"
-                      class="character-cropper"
-                    ></image-cropper>
-                    <mat-form-field appearance="outline" class="character-name-field">
-                      <input
-                        matInput
-                        type="text"
-                        [value]="state.name"
-                        (input)="onCharacterNameInput(state.id, $event)"
-                        maxlength="32"
-                        class="character-name-input"
-                        placeholder="Character name"
-                        autocomplete="off"
-                        autocapitalize="words"
-                        spellcheck="false"
-                      />
-                    </mat-form-field>
-                  </div>
-                }
+            <div class="character-list-title">Crop and Preview Characters:</div>
+            <div
+              class="crop-grid"
+              style="display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center; overflow-x: visible;"
+            >
+              @for (state of cropStates(); track state.id) {
+              <div class="crop-grid-item">
+                <image-cropper
+                  [imageBase64]="state.imageBase64"
+                  [maintainAspectRatio]="true"
+                  [aspectRatio]="1"
+                  format="png"
+                  [resizeToWidth]="512"
+                  [resizeToHeight]="512"
+                  (imageCropped)="onImageCropped(state.id, $event)"
+                  (imageLoaded)="onImageLoaded(state.id)"
+                  class="character-cropper"
+                ></image-cropper>
+                <mat-form-field
+                  appearance="outline"
+                  class="character-name-field"
+                >
+                  <input
+                    matInput
+                    type="text"
+                    [value]="state.name"
+                    (input)="onCharacterNameInput(state.id, $event)"
+                    maxlength="32"
+                    class="character-name-input"
+                    placeholder="Character name"
+                    autocomplete="off"
+                    autocapitalize="words"
+                    spellcheck="false"
+                  />
+                </mat-form-field>
               </div>
+              }
+            </div>
             }
           </mat-tab>
           <mat-tab label="Search Anime Characters">
-            <div class="search-section">
-              <mat-form-field appearance="outline">
-                <mat-label>Search Characters</mat-label>
-                <input
-                  matInput
-                  id="searchInput"
-                  type="text"
-                  [value]="searchQuery()"
-                  (input)="onSearchInput($event)"
-                  (keydown.enter)="onSearch()"
-                  placeholder="e.g. Naruto"
-                  autocomplete="off"
-                />
-              </mat-form-field>
-              <button
-                mat-raised-button
-                color="accent"
-                type="button"
-                (click)="onSearch()"
-                [disabled]="searching() || !searchQuery().trim()"
+            <div class="search-section" style="margin-top: 2rem;">
+              <div
+                class="search-controls"
+                style="display: flex; gap: 1rem; justify-content: center; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; max-width: 600px; margin-left: auto; margin-right: auto;"
               >
-                Search
-              </button>
-              @if (searching()) {
+                <mat-form-field
+                  appearance="outline"
+                  style="flex: 1 1 220px; min-width: 180px;"
+                >
+                  <mat-label>Search Characters</mat-label>
+                  <input
+                    matInput
+                    id="searchInput"
+                    type="text"
+                    [value]="searchQuery()"
+                    (input)="onSearchInput($event)"
+                    (keydown.enter)="onSearch()"
+                    placeholder="e.g. Naruto"
+                    autocomplete="off"
+                  />
+                </mat-form-field>
+                <button
+                  mat-raised-button
+                  color="accent"
+                  type="button"
+                  (click)="onSearch()"
+                  [disabled]="searching() || !searchQuery().trim()"
+                  style="height: 40px; margin-top: 2px;"
+                >
+                  Search
+                </button>
+              </div>
+              <div style="margin-bottom: 0.5rem; min-height: 1.5em;">
+                @if (searching()) {
                 <span class="search-status">Searching...</span>
-              } @else {
-                @if (searchError()) {
-                  <span class="search-status error">{{ searchError() }}</span>
-                }
-              }
-              <div class="search-results">
+                } @else { @if (searchError()) {
+                <span class="search-status error">{{ searchError() }}</span>
+                } }
+              </div>
+              <div class="search-results" style="margin-bottom: 1.5rem;">
                 @for (char of searchResults(); track char.mal_id) {
-                  <div
-                    class="search-result-item"
-                    [class.selected]="isSelectedSearchResult(char.mal_id)"
-                    (click)="onSelectSearchResult(char)"
-                    tabindex="0"
-                    role="button"
-                    [attr.aria-pressed]="isSelectedSearchResult(char.mal_id)"
-                  >
-                    <img
-                      [ngSrc]="char.images.jpg?.image_url || char.images.webp?.image_url || ''"
-                      width="80"
-                      height="80"
-                      [attr.alt]="char.name"
-                      loading="lazy"
-                    />
-                    <div class="search-result-name">{{ char.name }}</div>
-                  </div>
+                <div
+                  class="search-result-item"
+                  [class.selected]="isSelectedSearchResult(char.mal_id)"
+                  (click)="onSelectSearchResult(char)"
+                  tabindex="0"
+                  role="button"
+                  [attr.aria-pressed]="isSelectedSearchResult(char.mal_id)"
+                >
+                  <img
+                    [ngSrc]="
+                      char.images.jpg?.image_url ||
+                      char.images.webp?.image_url ||
+                      ''
+                    "
+                    width="80"
+                    height="80"
+                    [attr.alt]="char.name"
+                    loading="lazy"
+                  />
+                  <div class="search-result-name">{{ char.name }}</div>
+                </div>
                 }
               </div>
             </div>
             @if (searchCropStates().length > 0) {
-              <div class="character-list-title">Crop and Preview Characters:</div>
-              <div class="crop-grid">
-                @for (state of searchCropStates(); track state.id) {
-                  <div class="crop-grid-item">
-                    <image-cropper
-                      [imageBase64]="state.imageBase64"
-                      [maintainAspectRatio]="true"
-                      [aspectRatio]="1"
-                      format="png"
-                      [resizeToWidth]="512"
-                      [resizeToHeight]="512"
-                      (imageCropped)="onImageCropped(state.id, $event, true)"
-                      (imageLoaded)="onImageLoaded(state.id)"
-                      class="character-cropper"
-                    ></image-cropper>
-                    <mat-form-field appearance="outline" class="character-name-field">
-                      <input
-                        matInput
-                        type="text"
-                        [value]="state.name"
-                        (input)="onCharacterNameInput(state.id, $event, true)"
-                        maxlength="32"
-                        class="character-name-input"
-                        placeholder="Character name"
-                        autocomplete="off"
-                        autocapitalize="words"
-                        spellcheck="false"
-                      />
-                    </mat-form-field>
-                  </div>
-                }
+            <div class="character-list-title">Crop and Preview Characters:</div>
+            <div class="crop-grid">
+              @for (state of searchCropStates(); track state.id) {
+              <div class="crop-grid-item">
+                <image-cropper
+                  [imageBase64]="state.imageBase64"
+                  [maintainAspectRatio]="true"
+                  [aspectRatio]="1"
+                  format="png"
+                  [resizeToWidth]="512"
+                  [resizeToHeight]="512"
+                  (imageCropped)="onImageCropped(state.id, $event, true)"
+                  (imageLoaded)="onImageLoaded(state.id)"
+                  class="character-cropper"
+                ></image-cropper>
+                <mat-form-field
+                  appearance="outline"
+                  class="character-name-field"
+                >
+                  <input
+                    matInput
+                    type="text"
+                    [value]="state.name"
+                    (input)="onCharacterNameInput(state.id, $event, true)"
+                    maxlength="32"
+                    class="character-name-input"
+                    placeholder="Character name"
+                    autocomplete="off"
+                    autocapitalize="words"
+                    spellcheck="false"
+                  />
+                </mat-form-field>
               </div>
+              }
+            </div>
             }
           </mat-tab>
         </mat-tab-group>
@@ -206,9 +235,9 @@ import { Router } from '@angular/router';
           <button mat-button type="button" (click)="onCancel()">Cancel</button>
         </div>
         @if (loading()) {
-          <div class="status-message">Uploading...</div>
+        <div class="status-message">Uploading...</div>
         } @if (error()) {
-          <div class="status-message error">{{ error() }}</div>
+        <div class="status-message error">{{ error() }}</div>
         }
       </form>
     </main>
