@@ -1,167 +1,114 @@
+// Main container styles
+main {
+  // Constrain width on large screens and center it
+  max-width: 1200px;
+  margin: 0 auto;
+  // Add padding for smaller screens
+  padding: 16px;
+}
+
+.page-title {
+  margin-bottom: 24px;
+}
+
 .upload-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  max-width: 700px;
-  width: 100%;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
-  padding: 2rem 2.5rem 2rem 2.5rem;
+  gap: 20px;
 }
 
-.dialog-title {
-  margin-bottom: 0.5rem;
-  font-size: 1.4rem;
-  font-weight: 600;
-  text-align: center;
+// Tab content padding
+.tab-content {
+  // Add some padding inside the tabs
+  padding: 24px 4px;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  position: relative;
-}
-
-.form-group label {
-  font-weight: 500;
-  margin-bottom: 0.25rem;
-}
-
-input[type="file"] {
-  margin-top: 0.25rem;
-}
-
-.character-list {
-  background: #f7f7f7;
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.5rem;
-}
 .character-list-title {
+  margin-bottom: 16px;
   font-weight: 500;
-  margin-bottom: 0.5rem;
-}
-.character-item {
-  padding: 0.25rem 0;
-  font-size: 1rem;
 }
 
-.button-row {
-  display: flex;
-  gap: 1rem;
-  justify-content: flex-end;
-  margin-top: 0.5rem;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.status-message {
-  margin-top: 1rem;
-  font-size: 1rem;
-  color: #555;
-}
-.status-message.error {
-  color: #c62828;
-}
-
-.form-group input[type="text"],
-.form-group input[formControlName="setName"] {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #bdbdbd;
-  border-radius: 6px;
-  font-size: 1rem;
-  background: #fafafa;
-  transition: border-color 0.2s;
-}
-
-.form-group input[type="text"]:focus,
-.form-group input[formControlName="setName"]:focus {
-  outline: none;
-  border-color: #3f51b5;
-  background: #fff;
-}
-
-.form-group button[type="button"] {
-  margin-top: 0.25rem;
-  width: fit-content;
-}
-
-.file-count {
-  margin-left: 1rem;
-  font-size: 0.95rem;
-  color: #666;
-  align-self: center;
-}
-
+// Responsive grid for cropping characters
 .crop-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 2rem;
-  margin-top: 1rem;
-  justify-items: center;
-  align-items: start;
-  width: 100%;
-  box-sizing: border-box;
-  overflow-x: hidden;
+  // This is the key fix: it creates a responsive grid.
+  // Columns will be at least 240px wide, and will auto-fill the container.
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 24px;
 }
 
 .crop-grid-item {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  width: 100%;
-  max-width: 280px;
-  background: #fafafa;
-  border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-  padding: 1.5rem 1rem 1rem 1rem;
-  box-sizing: border-box;
-  margin: 0 auto;
-}
+  gap: 12px;
 
-.crop-grid-item .character-name {
-  margin-top: 0.5rem;
-  font-size: 1rem;
-  text-align: center;
-  font-weight: 500;
-}
-
-.character-name-field {
-  margin-top: 1.25rem;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-// .fullscreen-upload-form styles removed for normal page layout
-
-.character-cropper {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  max-width: 320px;
-  max-height: 320px;
-  display: block;
-  margin: 0 auto 0.5rem auto;
-}
-
-.character-cropper img,
-.character-cropper canvas {
-  object-fit: contain !important;
-  width: 100% !important;
-  height: 100% !important;
-  display: block;
-  background: #fff;
-}
-
-.mat-form-field {
-  width: 100%;
-}
-
-@media (max-width: 600px) {
-  .button-row {
-    flex-direction: column;
-    gap: 0.75rem;
-    align-items: stretch;
+  .cropper-container {
+    // Use aspect-ratio to maintain a square shape for the cropper area
+    aspect-ratio: 1 / 1;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 4px;
+    overflow: hidden;
+    // Ensure the cropper component fills this container
+    image-cropper {
+      width: 100%;
+      height: 100%;
+    }
   }
+}
+
+// Search controls styling
+.search-controls {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  flex-wrap: wrap; // Allow wrapping on small screens
+
+  .search-input-field {
+    flex-grow: 1;
+    // Set a min-width to prevent it from becoming too small before wrapping
+    min-width: 250px;
+  }
+}
+
+// Responsive flex container for search results
+.search-results {
+  display: flex;
+  flex-wrap: wrap; // This allows items to wrap to the next line
+  gap: 12px;
+  margin-top: 16px;
+  justify-content: flex-start; // Align items to the start
+}
+
+.search-result-item {
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 8px;
+  text-align: center;
+  width: 100px;
+  transition: background-color 0.2s, border-color 0.2s;
+
+  img {
+    border-radius: 4px;
+    object-fit: cover;
+  }
+
+  .search-result-name {
+    font-size: 12px;
+    margin-top: 4px;
+    word-wrap: break-word;
+  }
+
+  &.selected {
+    border-color: #3f51b5; // Using a fallback color
+    background-color: #e8eaf6;
+  }
+}
+
+.button-row {
+  display: flex;
+  gap: 16px;
+  margin-top: 16px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
 }

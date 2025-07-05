@@ -3,490 +3,287 @@ import {
   ChangeDetectionStrategy,
   signal,
   inject,
+  computed,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-// Removed MatDialogRef: not needed for routed component
-import { CustomCharacterSetService } from '../custom-character-set.service';
-import { Character } from '../models/character.model';
+import { Router } from '@angular/router';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
+
+// Material Modules
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTabsModule } from '@angular/material/tabs';
-import { CommonModule } from '@angular/common';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
+// Third-party and App-specific Imports
 import { ImageCropperComponent, ImageCroppedEvent } from 'ngx-image-cropper';
+import { CustomCharacterSetService } from '../custom-character-set.service';
+import { Character } from '../models/character.model';
+import { JikanApiService, JikanCharacterResult } from './jikan-api.service'; // Adjust path if needed
 
-import { NgOptimizedImage } from '@angular/common';
-import { Router } from '@angular/router';
+// --- Define robust state interfaces ---
+
+// Represents a character being prepared for upload (from either source)
+interface CharacterCropState {
+  // Unique ID for tracking in the UI (e.g., for @for loops)
+  readonly id: string;
+  // Unique ID from the source API, used to prevent duplicates
+  readonly sourceId: number | string;
+  name: string;
+  imageBase64: string;
+  croppedDataUrl: string | null;
+  // The source tab this character came from
+  source: 'upload' | 'search';
+}
+
+// Unified state object for the entire component
+interface ComponentState {
+  status: 'idle' | 'loading' | 'error' | 'submitting';
+  error: string | null;
+  searchQuery: string;
+  searchResults: JikanCharacterResult[];
+  characters: CharacterCropState[];
+}
 
 @Component({
   selector: 'app-custom-character-set-upload',
   standalone: true,
   imports: [
+    CommonModule,
     ReactiveFormsModule,
+    NgOptimizedImage,
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
     MatTabsModule,
-    CommonModule,
+    MatProgressSpinnerModule,
     ImageCropperComponent,
-    NgOptimizedImage,
   ],
-  template: `
-    <main>
-      <h2 class="page-title">Upload Custom Character Set</h2>
-      <form [formGroup]="form" (ngSubmit)="onUpload()" class="upload-form">
-        <mat-form-field appearance="outline" class="form-group">
-          <mat-label>Set Name</mat-label>
-          <input matInput id="setName" formControlName="setName" required />
-        </mat-form-field>
-        <mat-tab-group
-          [selectedIndex]="tabIndex()"
-          (selectedIndexChange)="onTabChange($event)"
-        >
-          <mat-tab label="Upload Images">
-            <div class="form-group">
-              <label for="characterFiles" class="visually-hidden"
-                >Characters</label
-              >
-              <input
-                id="characterFiles"
-                type="file"
-                multiple
-                (change)="onFilesSelected($event)"
-                accept="image/*"
-                #fileInput
-                style="display: none;"
-              />
-              <button
-                mat-raised-button
-                color="accent"
-                type="button"
-                (click)="fileInput.click()"
-              >
-                Choose Files
-              </button>
-              @if (cropStates().length > 0) {
-              <span class="file-count"
-                >{{ cropStates().length }} file(s) selected</span
-              >
-              }
-            </div>
-            @if (cropStates().length > 0) {
-            <div class="character-list-title">Crop and Preview Characters:</div>
-            <div
-              class="crop-grid"
-              style="display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center; overflow-x: visible;"
-            >
-              @for (state of cropStates(); track state.id) {
-              <div class="crop-grid-item">
-                <image-cropper
-                  [imageBase64]="state.imageBase64"
-                  [maintainAspectRatio]="true"
-                  [aspectRatio]="1"
-                  format="png"
-                  [resizeToWidth]="512"
-                  [resizeToHeight]="512"
-                  (imageCropped)="onImageCropped(state.id, $event)"
-                  (imageLoaded)="onImageLoaded(state.id)"
-                  class="character-cropper"
-                ></image-cropper>
-                <mat-form-field
-                  appearance="outline"
-                  class="character-name-field"
-                >
-                  <input
-                    matInput
-                    type="text"
-                    [value]="state.name"
-                    (input)="onCharacterNameInput(state.id, $event)"
-                    maxlength="32"
-                    class="character-name-input"
-                    placeholder="Character name"
-                    autocomplete="off"
-                    autocapitalize="words"
-                    spellcheck="false"
-                  />
-                </mat-form-field>
-              </div>
-              }
-            </div>
-            }
-          </mat-tab>
-          <mat-tab label="Search Anime Characters">
-            <div class="search-section" style="margin-top: 2rem;">
-              <div
-                class="search-controls"
-                style="display: flex; gap: 1rem; justify-content: center; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; max-width: 600px; margin-left: auto; margin-right: auto;"
-              >
-                <mat-form-field
-                  appearance="outline"
-                  style="flex: 1 1 220px; min-width: 180px;"
-                >
-                  <mat-label>Search Characters</mat-label>
-                  <input
-                    matInput
-                    id="searchInput"
-                    type="text"
-                    [value]="searchQuery()"
-                    (input)="onSearchInput($event)"
-                    (keydown.enter)="onSearch()"
-                    placeholder="e.g. Naruto"
-                    autocomplete="off"
-                  />
-                </mat-form-field>
-                <button
-                  mat-raised-button
-                  color="accent"
-                  type="button"
-                  (click)="onSearch()"
-                  [disabled]="searching() || !searchQuery().trim()"
-                  style="height: 40px; margin-top: 2px;"
-                >
-                  Search
-                </button>
-              </div>
-              <div style="margin-bottom: 0.5rem; min-height: 1.5em;">
-                @if (searching()) {
-                <span class="search-status">Searching...</span>
-                } @else { @if (searchError()) {
-                <span class="search-status error">{{ searchError() }}</span>
-                } }
-              </div>
-              <div class="search-results" style="margin-bottom: 1.5rem;">
-                @for (char of searchResults(); track char.mal_id) {
-                <div
-                  class="search-result-item"
-                  [class.selected]="isSelectedSearchResult(char.mal_id)"
-                  (click)="onSelectSearchResult(char)"
-                  tabindex="0"
-                  role="button"
-                  [attr.aria-pressed]="isSelectedSearchResult(char.mal_id)"
-                >
-                  <img
-                    [ngSrc]="
-                      char.images.jpg?.image_url ||
-                      char.images.webp?.image_url ||
-                      ''
-                    "
-                    width="80"
-                    height="80"
-                    [attr.alt]="char.name"
-                    loading="lazy"
-                  />
-                  <div class="search-result-name">{{ char.name }}</div>
-                </div>
-                }
-              </div>
-            </div>
-            @if (searchCropStates().length > 0) {
-            <div class="character-list-title">Crop and Preview Characters:</div>
-            <div class="crop-grid">
-              @for (state of searchCropStates(); track state.id) {
-              <div class="crop-grid-item">
-                <image-cropper
-                  [imageBase64]="state.imageBase64"
-                  [maintainAspectRatio]="true"
-                  [aspectRatio]="1"
-                  format="png"
-                  [resizeToWidth]="512"
-                  [resizeToHeight]="512"
-                  (imageCropped)="onImageCropped(state.id, $event, true)"
-                  (imageLoaded)="onImageLoaded(state.id)"
-                  class="character-cropper"
-                ></image-cropper>
-                <mat-form-field
-                  appearance="outline"
-                  class="character-name-field"
-                >
-                  <input
-                    matInput
-                    type="text"
-                    [value]="state.name"
-                    (input)="onCharacterNameInput(state.id, $event, true)"
-                    maxlength="32"
-                    class="character-name-input"
-                    placeholder="Character name"
-                    autocomplete="off"
-                    autocapitalize="words"
-                    spellcheck="false"
-                  />
-                </mat-form-field>
-              </div>
-              }
-            </div>
-            }
-          </mat-tab>
-        </mat-tab-group>
-        <div class="button-row">
-          <button
-            mat-raised-button
-            color="primary"
-            type="submit"
-            [disabled]="
-              form.invalid ||
-              loading() ||
-              (mode() === 'upload' && cropStates().length === 0) ||
-              (mode() === 'search' && searchCropStates().length === 0)
-            "
-          >
-            Upload
-          </button>
-          <button mat-button type="button" (click)="onCancel()">Cancel</button>
-        </div>
-        @if (loading()) {
-        <div class="status-message">Uploading...</div>
-        } @if (error()) {
-        <div class="status-message error">{{ error() }}</div>
-        }
-      </form>
-    </main>
-  `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  templateUrl: './custom-character-set-upload.component.html', // Use templateUrl for cleaner code
   styleUrls: ['./custom-character-set-upload.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomCharacterSetUploadComponent {
+  // --- Injected Services ---
   private fb = inject(FormBuilder);
-  private service = inject(CustomCharacterSetService);
   private router = inject(Router);
+  private customSetService = inject(CustomCharacterSetService);
+  private jikanApiService = inject(JikanApiService);
 
+  // --- Reactive Form ---
   form = this.fb.group({
-    setName: ['', Validators.required],
+    setName: ['', [Validators.required, Validators.maxLength(50)]],
   });
 
-  mode = signal<'upload' | 'search'>('upload');
+  // --- Unified State Signal ---
+  readonly state = signal<ComponentState>({
+    status: 'idle',
+    error: null,
+    searchQuery: '',
+    searchResults: [],
+    characters: [],
+  });
 
-  characters = signal<Character[]>([]);
-  loading = signal(false);
-  error = signal<string | null>(null);
+  // --- Computed Signals for Derived State ---
+  readonly selectedTabIndex = signal(0);
+  readonly isSearchTab = computed(() => this.selectedTabIndex() === 1);
 
-  tabIndex = signal(0);
+  // Filtered lists for each tab, derived from the single source of truth
+  readonly uploadTabCharacters = computed(() =>
+    this.state().characters.filter((c) => c.source === 'upload')
+  );
+  readonly searchTabCharacters = computed(() =>
+    this.state().characters.filter((c) => c.source === 'search')
+  );
+  readonly selectedSearchCharacterIds = computed(
+    () => new Set(this.searchTabCharacters().map((c) => c.sourceId))
+  );
 
-  onTabChange(index: number) {
-    this.tabIndex.set(index);
-    this.mode.set(index === 0 ? 'upload' : 'search');
+  // Simplified conditional logic for the view
+  readonly isSubmitting = computed(() => this.state().status === 'submitting');
+  readonly isSearching = computed(() => this.state().status === 'loading');
+  readonly isUploadDisabled = computed(
+    () =>
+      this.form.invalid ||
+      this.isSubmitting() ||
+      this.state().characters.length === 0
+  );
+
+  // --- Event Handlers ---
+
+  onTabChange(index: number): void {
+    this.selectedTabIndex.set(index);
   }
 
-  // Upload mode state
-  cropStates = signal<
-    {
-      id: string;
-      name: string;
-      imageBase64: string;
-      croppedDataUrl: string | null;
-    }[]
-  >([]);
-
-  // Search mode state
-  searchQuery = signal('');
-  searching = signal(false);
-  searchError = signal<string | null>(null);
-  searchResults = signal<JikanCharacterResult[]>([]);
-  searchCropStates = signal<
-    {
-      id: string;
-      name: string;
-      imageBase64: string;
-      croppedDataUrl: string | null;
-      mal_id: number;
-    }[]
-  >([]);
-
-  async onFilesSelected(event: Event) {
+  async onFilesSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     if (!input.files) return;
-    const files = Array.from(input.files);
-    const states: {
-      id: string;
-      name: string;
-      imageBase64: string;
-      croppedDataUrl: string | null;
-    }[] = [];
-    for (const file of files) {
-      const imageBase64 = await this.fileToDataUrl(file);
-      const id = crypto.randomUUID
-        ? crypto.randomUUID()
-        : Math.random().toString(36).slice(2);
-      states.push({
+
+    // Create a CharacterCropState for each valid file
+    const newCharactersPromises = Array.from(input.files).map(async (file) => {
+      const id = crypto.randomUUID();
+      return {
         id,
-        name: file.name.replace(/\.[^/.]+$/, ''),
-        imageBase64,
+        sourceId: id, // For file uploads, the unique ID is the source ID
+        name: file.name.replace(/\.[^/.]+$/, ''), // Clean file name
+        imageBase64: await this.fileToDataUrl(file),
         croppedDataUrl: null,
-      });
-    }
-    this.cropStates.set(states);
-  }
-
-  onCharacterNameEdit(id: string, newName: string, searchMode = false) {
-    if (searchMode) {
-      this.searchCropStates.update((states) =>
-        states.map((s) => (s.id === id ? { ...s, name: newName } : s))
-      );
-    } else {
-      this.cropStates.update((states) =>
-        states.map((s) => (s.id === id ? { ...s, name: newName } : s))
-      );
-    }
-  }
-
-  onCharacterNameInput(id: string, event: Event, searchMode = false) {
-    const value = (event.target as HTMLInputElement).value || '';
-    this.onCharacterNameEdit(id, value, searchMode);
-  }
-
-  onImageCropped(id: string, event: ImageCroppedEvent, searchMode = false) {
-    if (event.base64) {
-      const updateFn = (states: any[]) =>
-        states.map((s) =>
-          s.id === id ? { ...s, croppedDataUrl: event.base64 ?? null } : s
-        );
-      if (searchMode) {
-        this.searchCropStates.update(updateFn);
-      } else {
-        this.cropStates.update(updateFn);
-      }
-    } else if (event.blob) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const updateFn = (states: any[]) =>
-          states.map((s) =>
-            s.id === id
-              ? { ...s, croppedDataUrl: (reader.result as string) ?? null }
-              : s
-          );
-        if (searchMode) {
-          this.searchCropStates.update(updateFn);
-        } else {
-          this.cropStates.update(updateFn);
-        }
+        source: 'upload' as const,
       };
-      reader.readAsDataURL(event.blob);
-    } else {
-      const updateFn = (states: any[]) =>
-        states.map((s) => (s.id === id ? { ...s, croppedDataUrl: null } : s));
-      if (searchMode) {
-        this.searchCropStates.update(updateFn);
-      } else {
-        this.cropStates.update(updateFn);
-      }
-    }
-  }
-
-  onImageLoaded(_id: string) {
-    // Placeholder for future logic if needed
-  }
-
-  private async fileToDataUrl(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
     });
+
+    const newCharacters = await Promise.all(newCharactersPromises);
+
+    // Update state immutably, adding new characters
+    this.state.update((s) => ({
+      ...s,
+      characters: [...s.characters, ...newCharacters],
+    }));
+
+    // Reset the file input to allow selecting the same file again
+    input.value = '';
   }
 
-  // --- Search Mode Logic ---
-
-  onSearchInput(event: Event) {
-    this.searchQuery.set((event.target as HTMLInputElement).value);
+  onSearchQueryInput(event: Event): void {
+    const query = (event.target as HTMLInputElement).value;
+    this.state.update((s) => ({ ...s, searchQuery: query }));
   }
 
-  async onSearch() {
-    const query = this.searchQuery().trim();
+  async onSearch(): Promise<void> {
+    const query = this.state().searchQuery.trim();
     if (!query) return;
-    this.searching.set(true);
-    this.searchError.set(null);
+
+    this.state.update((s) => ({ ...s, status: 'loading', error: null }));
     try {
-      // Use fetch to call Jikan REST API directly
-      const res = await fetch(
-        `https://api.jikan.moe/v4/characters?q=${encodeURIComponent(
-          query
-        )}&limit=10`
-      );
-      if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-      const data = await res.json();
-      this.searchResults.set(Array.isArray(data?.data) ? data.data : []);
+      const results = await this.jikanApiService.searchCharacters(query);
+      this.state.update((s) => ({
+        ...s,
+        searchResults: results,
+        status: 'idle',
+      }));
     } catch (err) {
-      console.error('Jikan API search error:', err);
-      this.searchError.set('Failed to fetch characters');
-      this.searchResults.set([]);
-    } finally {
-      this.searching.set(false);
+      this.state.update((s) => ({
+        ...s,
+        status: 'error',
+        error: err instanceof Error ? err.message : 'An unknown error occurred',
+        searchResults: [],
+      }));
     }
   }
 
-  isSelectedSearchResult(mal_id: number): boolean {
-    return this.searchCropStates().some((s) => s.mal_id === mal_id);
-  }
+  async onSelectSearchResult(char: JikanCharacterResult): Promise<void> {
+    if (this.selectedSearchCharacterIds().has(char.mal_id)) return;
 
-  async onSelectSearchResult(char: any) {
-    if (this.isSelectedSearchResult(char.mal_id)) return;
-    // Get the best available image
     const imageUrl =
-      char.images?.jpg?.image_url || char.images?.webp?.image_url || '';
+      char.images?.jpg?.image_url || char.images?.webp?.image_url;
     if (!imageUrl) return;
-    const imageBase64 = await this.fetchImageAsBase64(imageUrl);
-    const id = crypto.randomUUID
-      ? crypto.randomUUID()
-      : Math.random().toString(36).slice(2);
-    this.searchCropStates.update((states) => [
-      ...states,
-      {
-        id,
+
+    try {
+      // Use a proxy for CORS issues if necessary, or fetch directly
+      const imageBase64 = await this.fetchImageAsBase64(imageUrl);
+      const newCharacter: CharacterCropState = {
+        id: crypto.randomUUID(),
+        sourceId: char.mal_id,
         name: char.name,
         imageBase64,
         croppedDataUrl: null,
-        mal_id: char.mal_id,
-      },
-    ]);
-  }
+        source: 'search' as const,
+      };
 
-  private async fetchImageAsBase64(url: string): Promise<string> {
-    const res = await fetch(url);
-    const blob = await res.blob();
-    return await this.fileToDataUrl(
-      new File([blob], 'character.png', { type: blob.type })
-    );
-  }
-
-  async onUpload() {
-    if (this.form.invalid) return;
-    const states =
-      this.mode() === 'upload' ? this.cropStates() : this.searchCropStates();
-    if (states.length === 0) return;
-    this.loading.set(true);
-    this.error.set(null);
-    try {
-      const characters: Character[] = states
-        .filter((s) => s.croppedDataUrl)
-        .map((s) => ({
-          name: s.name,
-          imageUrl: s.croppedDataUrl!,
-        }));
-      await this.service.uploadCharacterSet(
-        this.form.value.setName!,
-        characters
-      );
-      this.router.navigateByUrl('/');
-    } catch (err) {
-      console.error('Upload failed:', err);
-      this.error.set('Upload failed. Please try again.');
-    } finally {
-      this.loading.set(false);
+      this.state.update((s) => ({
+        ...s,
+        characters: [...s.characters, newCharacter],
+      }));
+    } catch (error) {
+      console.error('Failed to fetch character image:', error);
+      this.state.update((s) => ({
+        ...s,
+        error: 'Could not load character image.',
+      }));
     }
   }
 
-  onCancel() {
+  onCharacterNameInput(id: string, event: Event): void {
+    const newName = (event.target as HTMLInputElement).value;
+    this.updateCharacter(id, { name: newName });
+  }
+
+  onImageCropped(id: string, event: ImageCroppedEvent): void {
+    this.updateCharacter(id, { croppedDataUrl: event.base64 ?? null });
+  }
+
+  async onUpload(): Promise<void> {
+    if (this.isUploadDisabled()) return;
+
+    this.state.update((s) => ({ ...s, status: 'submitting', error: null }));
+
+    const charactersToUpload: Character[] = this.state()
+      .characters.filter((c) => c.croppedDataUrl) // Ensure image is cropped
+      .map(({ name, croppedDataUrl }) => ({
+        name: name || 'Unnamed',
+        imageUrl: croppedDataUrl!,
+      }));
+
+    if (charactersToUpload.length === 0) {
+      this.state.update((s) => ({
+        ...s,
+        status: 'error',
+        error: 'No characters with cropped images to upload.',
+      }));
+      return;
+    }
+
+    try {
+      await this.customSetService.uploadCharacterSet(
+        this.form.value.setName!,
+        charactersToUpload
+      );
+      await this.router.navigateByUrl('/'); // Navigate on success
+    } catch (err) {
+      console.error('Upload failed:', err);
+      this.state.update((s) => ({
+        ...s,
+        status: 'error',
+        error: 'Upload failed. Please try again.',
+      }));
+    }
+  }
+
+  onCancel(): void {
     this.router.navigateByUrl('/');
   }
-}
 
-// Jikan character result type
-declare interface JikanCharacterResult {
-  mal_id: number;
-  name: string;
-  images: {
-    jpg?: { image_url?: string };
-    webp?: { image_url?: string };
-  };
+  // --- Private Helper Methods ---
+
+  private updateCharacter(
+    id: string,
+    props: Partial<CharacterCropState>
+  ): void {
+    this.state.update((s) => ({
+      ...s,
+      characters: s.characters.map((char) =>
+        char.id === id ? { ...char, ...props } : char
+      ),
+    }));
+  }
+
+  private async fileToDataUrl(blob: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  private async fetchImageAsBase64(url: string): Promise<string> {
+    // Note: Fetching images from external domains might be blocked by CORS.
+    // A backend proxy may be required in a real-world application.
+    const response = await fetch(url);
+    if (!response.ok)
+      throw new Error(`Failed to fetch image: ${response.statusText}`);
+    const blob = await response.blob();
+    return this.fileToDataUrl(blob);
+  }
 }
