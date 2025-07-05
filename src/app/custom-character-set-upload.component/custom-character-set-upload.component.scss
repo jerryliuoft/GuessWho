@@ -1,26 +1,15 @@
-// Main container styles
-main {
-  // Constrain width on large screens and center it
-  max-width: 1200px;
-  margin: 0 auto;
-  // Add padding for smaller screens
-  padding: 16px;
-}
-
 .page-title {
   margin-bottom: 24px;
+  text-align: center;
 }
 
-.upload-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.set-name-field {
+  width: 100%;
+  margin-bottom: 16px;
 }
 
-// Tab content padding
 .tab-content {
-  // Add some padding inside the tabs
-  padding: 24px 4px;
+  padding: 24px 16px;
 }
 
 .character-list-title {
