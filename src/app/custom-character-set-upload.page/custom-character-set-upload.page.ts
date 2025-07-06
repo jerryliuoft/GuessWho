@@ -266,7 +266,7 @@ export class CustomCharacterSetUploadPage {
 
       this.state.update((s) => ({
         ...s,
-        characters: [...s.characters, newCharacter],
+        characters: s.characters.concat(newCharacter),
       }));
     } catch (error) {
       console.error('Failed to fetch character image:', error);
@@ -332,8 +332,6 @@ export class CustomCharacterSetUploadPage {
       ...s,
       selectedAnime: null,
       characterSearchResults: [],
-      status: 'idle',
-      error: null,
     }));
   }
 
