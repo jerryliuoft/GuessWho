@@ -124,7 +124,9 @@ export class CustomCharacterSetUploadPage {
       !this.state().animeSearchQuery.trim()
   );
   readonly isUploadDisabled = computed(() => {
-    return false; // Temporarily force enable for debugging
+    const setNameValid = this.form.controls.setName.valid;
+    const hasEnoughCharacters = this.croppedCharacterCount() > 1;
+    return !setNameValid || !hasEnoughCharacters || this.isSubmitting();
   });
 
   readonly showCropMessage = computed(
