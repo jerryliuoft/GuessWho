@@ -17,13 +17,13 @@
           <div class="tab-content">
             <div class="search-controls">
               <mat-form-field appearance="outline" class="search-input-field">
-                <mat-label>Search Characters</mat-label>
+                <mat-label>Search Anime</mat-label>
                 <input
                   matInput
                   type="text"
-                  [value]="state().searchQuery"
+                  [value]="state().animeSearchQuery"
                   (input)="onSearchQueryInput($event)"
-                  (keydown.enter)="onSearch()"
+                  (keydown.enter)="onSearchAnime()"
                   placeholder="e.g. Naruto"
                   autocomplete="off"
                 />
@@ -32,28 +32,38 @@
                 mat-raised-button
                 color="accent"
                 type="button"
-                (click)="onSearch()"
-                [disabled]="isSearching() || !state().searchQuery.trim()"
+                (click)="onSearchAnime()"
+                [disabled]="state().status === 'searchingAnime' || !state().animeSearchQuery.trim()"
               >
-                Search
+                Search Anime
               </button>
             </div>
 
+            @if (state().status === 'searchingAnime') {
             <div>
-              @if (isSearching()) {
               <mat-spinner diameter="24"></mat-spinner>
-              <span>Searching...</span>
-              } @else if (state().status === 'error' && state().error) {
-              <span>{{ state().error }}</span>
-              }
+              <span>Searching Anime...</span>
             </div>
-
+            } @else if (state().status === 'fetchingCharacters') {
+            <div>
+              <mat-spinner diameter="24"></mat-spinner>
+              <span>Fetching Characters...</span>
+            </div>
+            } @else if (state().status === 'error' && state().error) {
+            <div>
+              <span>{{ state().error }}</span>
+            </div>
+            } @else if (state().selectedAnime) {
+            <div class="selected-anime-info">
+              <h3>Characters from: {{ state().selectedAnime?.title }}</h3>
+              <button mat-button (click)="backToAnimeSearch()">Back to Anime Search</button>
+            </div>
             <div class="search-results">
-              @for (char of state().searchResults; track char.mal_id) {
+              @for (char of state().characterSearchResults; track char.mal_id) {
               <div
                 class="search-result-item"
                 [class.selected]="selectedSearchCharacterIds().has(char.mal_id)"
-                (click)="onSelectSearchResult(char)"
+                (click)="onSelectCharacter(char)"
                 tabindex="0"
                 role="button"
                 [attr.aria-pressed]="
@@ -75,6 +85,31 @@
               </div>
               }
             </div>
+            } @else {
+            <div class="search-results">
+              @for (anime of state().animeSearchResults; track anime.mal_id) {
+              <div
+                class="search-result-item"
+                (click)="onSelectAnime(anime)"
+                tabindex="0"
+                role="button"
+              >
+                <img
+                  [ngSrc]="
+                    anime.images.jpg?.image_url ||
+                    anime.images.webp?.image_url ||
+                    ''
+                  "
+                  width="80"
+                  height="80"
+                  [alt]="anime.title"
+                  loading="lazy"
+                />
+                <div class="search-result-name">{{ anime.title }}</div>
+              </div>
+              }
+            </div>
+            }
 
             @if (searchTabCharacters().length > 0) {
             <div class="character-list-title">Crop and Name Characters:</div>

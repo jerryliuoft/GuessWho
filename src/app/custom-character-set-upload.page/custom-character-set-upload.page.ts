@@ -20,7 +20,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ImageCropperComponent, ImageCroppedEvent } from 'ngx-image-cropper';
 import { CustomCharacterSetService } from '../custom-character-set.service';
 import { Character } from '../models/character.model';
-import { JikanApiService, JikanCharacterResult } from './jikan-api.service';
+import { JikanApiService, JikanCharacterResult, JikanAnimeResult, JikanAnimeCharacter } from './jikan-api.service';
 
 // --- Define robust state interfaces ---
 
@@ -39,10 +39,12 @@ interface CharacterCropState {
 
 // Unified state object for the entire component
 interface ComponentState {
-  status: 'idle' | 'loading' | 'error' | 'submitting';
+  status: 'idle' | 'loading' | 'error' | 'submitting' | 'searchingAnime' | 'fetchingCharacters';
   error: string | null;
-  searchQuery: string;
-  searchResults: JikanCharacterResult[];
+  animeSearchQuery: string;
+  animeSearchResults: JikanAnimeResult[];
+  selectedAnime: JikanAnimeResult | null;
+  characterSearchResults: JikanCharacterResult[];
   characters: CharacterCropState[];
 }
 
@@ -80,8 +82,10 @@ export class CustomCharacterSetUploadPage {
   readonly state = signal<ComponentState>({
     status: 'idle',
     error: null,
-    searchQuery: '',
-    searchResults: [],
+    animeSearchQuery: '',
+    animeSearchResults: [],
+    selectedAnime: null,
+    characterSearchResults: [],
     characters: [],
   });
 
@@ -103,6 +107,7 @@ export class CustomCharacterSetUploadPage {
   // Simplified conditional logic for the view
   readonly isSubmitting = computed(() => this.state().status === 'submitting');
   readonly isSearching = computed(() => this.state().status === 'loading');
+  readonly isAnimeSearchDisabled = computed(() => this.state().status === 'searchingAnime' || !this.state().animeSearchQuery.trim());
   readonly isUploadDisabled = computed(
     () =>
       this.form.invalid ||
@@ -147,19 +152,19 @@ export class CustomCharacterSetUploadPage {
 
   onSearchQueryInput(event: Event): void {
     const query = (event.target as HTMLInputElement).value;
-    this.state.update((s) => ({ ...s, searchQuery: query }));
+    this.state.update((s) => ({ ...s, animeSearchQuery: query }));
   }
 
-  async onSearch(): Promise<void> {
-    const query = this.state().searchQuery.trim();
+  async onSearchAnime(): Promise<void> {
+    const query = this.state().animeSearchQuery.trim();
     if (!query) return;
 
-    this.state.update((s) => ({ ...s, status: 'loading', error: null }));
+    this.state.update((s) => ({ ...s, status: 'searchingAnime', error: null }));
     try {
-      const results = await this.jikanApiService.searchCharacters(query);
+      const results = await this.jikanApiService.searchAnime(query);
       this.state.update((s) => ({
         ...s,
-        searchResults: results,
+        animeSearchResults: results,
         status: 'idle',
       }));
     } catch (err) {
@@ -167,12 +172,32 @@ export class CustomCharacterSetUploadPage {
         ...s,
         status: 'error',
         error: err instanceof Error ? err.message : 'An unknown error occurred',
-        searchResults: [],
+        animeSearchResults: [],
       }));
     }
   }
 
-  async onSelectSearchResult(char: JikanCharacterResult): Promise<void> {
+  async onSelectAnime(anime: JikanAnimeResult): Promise<void> {
+    this.state.update((s) => ({ ...s, selectedAnime: anime, status: 'fetchingCharacters', error: null }));
+    try {
+      const characters = await this.jikanApiService.getAnimeCharacters(anime.mal_id);
+      const characterResults: JikanCharacterResult[] = characters.map(c => c.character);
+      this.state.update((s) => ({
+        ...s,
+        characterSearchResults: characterResults,
+        status: 'idle'
+      }));
+    } catch (err) {
+      this.state.update((s) => ({
+        ...s,
+        status: 'error',
+        error: err instanceof Error ? err.message : 'An unknown error occurred',
+        characterSearchResults: [],
+      }));
+    }
+  }
+
+  async onSelectCharacter(char: JikanCharacterResult): Promise<void> {
     if (this.selectedSearchCharacterIds().has(char.mal_id)) return;
 
     const imageUrl =
@@ -252,6 +277,16 @@ export class CustomCharacterSetUploadPage {
 
   onCancel(): void {
     this.router.navigateByUrl('/');
+  }
+
+  backToAnimeSearch(): void {
+    this.state.update(s => ({
+      ...s,
+      selectedAnime: null,
+      characterSearchResults: [],
+      status: 'idle',
+      error: null,
+    }));
   }
 
   // --- Private Helper Methods ---
