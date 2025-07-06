@@ -20,7 +20,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ImageCropperComponent, ImageCroppedEvent } from 'ngx-image-cropper';
 import { CustomCharacterSetService } from '../custom-character-set.service';
 import { Character } from '../models/character.model';
-import { JikanApiService, JikanCharacterResult } from './jikan-api.service'; // Adjust path if needed
+import { JikanApiService, JikanCharacterResult } from './jikan-api.service';
 
 // --- Define robust state interfaces ---
 
@@ -47,7 +47,7 @@ interface ComponentState {
 }
 
 @Component({
-  selector: 'app-custom-character-set-upload',
+  selector: 'app-custom-character-set-upload-page',
   standalone: true,
   imports: [
     CommonModule,
@@ -60,11 +60,11 @@ interface ComponentState {
     MatProgressSpinnerModule,
     ImageCropperComponent,
   ],
-  templateUrl: './custom-character-set-upload.component.html', // Use templateUrl for cleaner code
-  styleUrls: ['./custom-character-set-upload.component.scss'],
+  templateUrl: './custom-character-set-upload.page.html', // Use templateUrl for cleaner code
+  styleUrls: ['./custom-character-set-upload.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CustomCharacterSetUploadComponent {
+export class CustomCharacterSetUploadPage {
   // --- Injected Services ---
   private fb = inject(FormBuilder);
   private router = inject(Router);

@@ -14,7 +14,7 @@ import { RouterModule } from '@angular/router';
 import { CharacterSet } from '../models/character.model';
 import { CharacterSetService } from '../character-set.service';
 import { DEMO_SET } from '../models/character.model';
-import { CustomCharacterSetUploadComponent } from '../custom-character-set-upload.component/custom-character-set-upload.component';
+import { CustomCharacterSetUploadPage } from '../custom-character-set-upload.page/custom-character-set-upload.page';
 
 @Component({
   selector: 'character-set-selector',
