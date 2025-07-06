@@ -1,6 +1,4 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { CharacterGridComponent } from './character-grid.component/character-grid.component';
-import { CharacterSetSelectorComponent } from './character-set-selector.component/character-set-selector.component';
 import { CharacterSet } from './models/character.model';
 import { DEMO_SET } from './models/character.model';
 import { MatCardModule } from '@angular/material/card';
@@ -10,9 +8,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDialogModule } from '@angular/material/dialog';
-import { YourCharacterComponent } from './your-character.component';
-import { ToastComponent } from './toast.component';
-import { ToastService } from './toast.service';
 import { inject } from '@angular/core';
 import { GameService } from './game.service';
 import { RouterOutlet } from '@angular/router';
@@ -21,7 +16,6 @@ import { RouterOutlet } from '@angular/router';
   selector: 'app-root',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    ToastComponent,
     MatCardModule,
     MatDividerModule,
     MatToolbarModule,
@@ -35,7 +29,6 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './app.scss',
 })
 export class App {
-  toast = new ToastService();
   gameService = inject(GameService);
 
   constructor() {
