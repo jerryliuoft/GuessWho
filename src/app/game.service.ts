@@ -20,6 +20,13 @@ export class GameService {
     this.pickMysteryCharacter();
   }
 
+  startGame() {
+    const currentSet = this._characterSet();
+    if (currentSet) {
+      this.loadSet(currentSet);
+    }
+  }
+
   pickMysteryCharacter() {
     const chars = this._characterSet()?.characters ?? [];
     if (chars.length > 0) {

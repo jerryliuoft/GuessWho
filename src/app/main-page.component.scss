@@ -10,3 +10,10 @@
 .character-grid-section {
   margin-top: 1rem;
 }
+
+.start-game-button {
+  @media (max-width: 600px) {
+    width: 100%;
+    margin-top: 1rem;
+  }
+}
