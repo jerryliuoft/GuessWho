@@ -20,7 +20,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ImageCropperComponent, ImageCroppedEvent } from 'ngx-image-cropper';
 import { CustomCharacterSetService } from '../custom-character-set.service';
 import { Character } from '../models/character.model';
-import { JikanApiService, JikanCharacterResult, JikanAnimeResult, JikanAnimeCharacter } from './jikan-api.service';
+import {
+  JikanApiService,
+  JikanCharacterResult,
+  JikanAnimeResult,
+  JikanAnimeCharacter,
+} from './jikan-api.service';
 
 // --- Define robust state interfaces ---
 
@@ -39,7 +44,13 @@ interface CharacterCropState {
 
 // Unified state object for the entire component
 interface ComponentState {
-  status: 'idle' | 'loading' | 'error' | 'submitting' | 'searchingAnime' | 'fetchingCharacters';
+  status:
+    | 'idle'
+    | 'loading'
+    | 'error'
+    | 'submitting'
+    | 'searchingAnime'
+    | 'fetchingCharacters';
   error: string | null;
   animeSearchQuery: string;
   animeSearchResults: JikanAnimeResult[];
@@ -107,12 +118,23 @@ export class CustomCharacterSetUploadPage {
   // Simplified conditional logic for the view
   readonly isSubmitting = computed(() => this.state().status === 'submitting');
   readonly isSearching = computed(() => this.state().status === 'loading');
-  readonly isAnimeSearchDisabled = computed(() => this.state().status === 'searchingAnime' || !this.state().animeSearchQuery.trim());
-  readonly isUploadDisabled = computed(
+  readonly isAnimeSearchDisabled = computed(
     () =>
-      this.form.invalid ||
-      this.isSubmitting() ||
-      this.state().characters.length === 0
+      this.state().status === 'searchingAnime' ||
+      !this.state().animeSearchQuery.trim()
+  );
+  readonly isUploadDisabled = computed(() => {
+    return false; // Temporarily force enable for debugging
+  });
+
+  readonly showCropMessage = computed(
+    () =>
+      this.state().characters.length > 0 &&
+      !this.state().characters.some((c) => c.croppedDataUrl)
+  );
+
+  readonly croppedCharacterCount = computed(
+    () => this.state().characters.filter((c) => c.croppedDataUrl).length
   );
 
   // --- Event Handlers ---
@@ -178,14 +200,23 @@ export class CustomCharacterSetUploadPage {
   }
 
   async onSelectAnime(anime: JikanAnimeResult): Promise<void> {
-    this.state.update((s) => ({ ...s, selectedAnime: anime, status: 'fetchingCharacters', error: null }));
+    this.state.update((s) => ({
+      ...s,
+      selectedAnime: anime,
+      status: 'fetchingCharacters',
+      error: null,
+    }));
     try {
-      const characters = await this.jikanApiService.getAnimeCharacters(anime.mal_id);
-      const characterResults: JikanCharacterResult[] = characters.map(c => c.character);
+      const characters = await this.jikanApiService.getAnimeCharacters(
+        anime.mal_id
+      );
+      const characterResults: JikanCharacterResult[] = characters.map(
+        (c) => c.character
+      );
       this.state.update((s) => ({
         ...s,
         characterSearchResults: characterResults,
-        status: 'idle'
+        status: 'idle',
       }));
     } catch (err) {
       this.state.update((s) => ({
@@ -212,7 +243,7 @@ export class CustomCharacterSetUploadPage {
         sourceId: char.mal_id,
         name: char.name,
         imageBase64,
-        croppedDataUrl: null,
+        croppedDataUrl: imageBase64, // Initialize croppedDataUrl with imageBase64
         source: 'search' as const,
       };
 
@@ -280,7 +311,7 @@ export class CustomCharacterSetUploadPage {
   }
 
   backToAnimeSearch(): void {
-    this.state.update(s => ({
+    this.state.update((s) => ({
       ...s,
       selectedAnime: null,
       characterSearchResults: [],
