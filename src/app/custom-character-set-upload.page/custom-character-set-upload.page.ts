@@ -229,7 +229,13 @@ export class CustomCharacterSetUploadPage {
   }
 
   async onSelectCharacter(char: JikanCharacterResult): Promise<void> {
-    if (this.selectedSearchCharacterIds().has(char.mal_id)) return;
+    if (this.selectedSearchCharacterIds().has(char.mal_id)) {
+      this.state.update((s) => ({
+        ...s,
+        characters: s.characters.filter((c) => c.sourceId !== char.mal_id),
+      }));
+      return;
+    }
 
     const imageUrl =
       char.images?.jpg?.image_url || char.images?.webp?.image_url;
