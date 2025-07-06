@@ -1,19 +1,24 @@
-<form class="set-selector-form" autocomplete="off">
-  <div class="set-selector-left">
-    <mat-form-field appearance="outline" class="set-select-field">
-      <mat-label>Choose a character set</mat-label>
-      <mat-select (selectionChange)="onSetChange($event)">
-        @for (set of sets(); track set.name) {
-        <mat-option [value]="set.name">{{ set.name }}</mat-option>
-        }
+<div class="set-selector-container">
+  <div class="set-selector-header">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search Character Sets</mat-label>
+      <input matInput [formControl]="searchControl" />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="sort-field">
+      <mat-label>Sort By</mat-label>
+      <mat-select [formControl]="sortControl">
+        <mat-option value="recent">Recently Added</mat-option>
+        <mat-option value="asc">Name (A-Z)</mat-option>
+        <mat-option value="desc">Name (Z-A)</mat-option>
       </mat-select>
     </mat-form-field>
-  </div>
-  <div class="set-selector-right">
+
     <a
       mat-raised-button
       color="primary"
-      class="browse-btn"
+      class="upload-btn"
       routerLink="/create-set"
       style="text-decoration: none"
     >
@@ -21,4 +26,32 @@
       Upload Custom Set
     </a>
   </div>
-</form>
+
+  <div class="character-set-grid">
+    @for (set of filteredAndSortedSets(); track set.name) {
+    <mat-card class="character-set-card" (click)="onSetSelected(set)">
+      <mat-card-header>
+        <mat-card-title>{{ set.name }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="character-preview-images">
+          @for (character of set.characters.slice(0, 4); track character.name) {
+          <img
+            [src]="character.imageUrl"
+            alt="{{ character.name }}"
+            class="character-thumbnail"
+          />
+          }
+          @if (set.characters.length > 4) {
+          <div class="more-characters-overlay">+{{ set.characters.length - 4 }}</div>
+          }
+        </div>
+        <p class="character-count">{{ set.characters.length }} Characters</p>
+      </mat-card-content>
+    </mat-card>
+    }
+    @empty {
+    <p class="no-results">No character sets found matching your criteria.</p>
+    }
+  </div>
+</div>
