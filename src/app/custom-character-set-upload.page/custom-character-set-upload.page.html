@@ -12,68 +12,6 @@
         (selectedIndexChange)="onTabChange($event)"
         animationDuration="0ms"
       >
-        <!-- UPLOAD FROM FILES TAB -->
-        <mat-tab label="Upload Images">
-          <div class="tab-content">
-            <div>
-              <label for="characterFiles" style="display: none"
-                >Characters</label
-              >
-              <input
-                id="characterFiles"
-                type="file"
-                multiple
-                (change)="onFilesSelected($event)"
-                accept="image/*"
-                #fileInput
-                style="display: none"
-              />
-              <button
-                mat-raised-button
-                color="accent"
-                type="button"
-                (click)="fileInput.click()"
-              >
-                Choose Files
-              </button>
-              @if (uploadTabCharacters().length > 0) {
-              <span
-                >{{ uploadTabCharacters().length }} file(s) ready to crop</span
-              >
-              }
-            </div>
-
-            @if (uploadTabCharacters().length > 0) {
-            <div class="character-list-title">Crop and Name Characters:</div>
-            <div class="crop-grid">
-              @for (char of uploadTabCharacters(); track char.id) {
-              <div class="crop-grid-item">
-                <div class="cropper-container">
-                  <image-cropper
-                    [imageBase64]="char.imageBase64"
-                    (imageCropped)="onImageCropped(char.id, $event)"
-                    [maintainAspectRatio]="true"
-                    [aspectRatio]="1"
-                    format="png"
-                    output="base64"
-                  ></image-cropper>
-                </div>
-                <mat-form-field appearance="outline">
-                  <mat-label>Name</mat-label>
-                  <input
-                    matInput
-                    required
-                    [value]="char.name"
-                    (input)="onCharacterNameInput(char.id, $event)"
-                  />
-                </mat-form-field>
-              </div>
-              }
-            </div>
-            }
-          </div>
-        </mat-tab>
-
         <!-- SEARCH ANIME CHARACTERS TAB -->
         <mat-tab label="Search Anime Characters">
           <div class="tab-content">
@@ -142,6 +80,68 @@
             <div class="character-list-title">Crop and Name Characters:</div>
             <div class="crop-grid">
               @for (char of searchTabCharacters(); track char.id) {
+              <div class="crop-grid-item">
+                <div class="cropper-container">
+                  <image-cropper
+                    [imageBase64]="char.imageBase64"
+                    (imageCropped)="onImageCropped(char.id, $event)"
+                    [maintainAspectRatio]="true"
+                    [aspectRatio]="1"
+                    format="png"
+                    output="base64"
+                  ></image-cropper>
+                </div>
+                <mat-form-field appearance="outline">
+                  <mat-label>Name</mat-label>
+                  <input
+                    matInput
+                    required
+                    [value]="char.name"
+                    (input)="onCharacterNameInput(char.id, $event)"
+                  />
+                </mat-form-field>
+              </div>
+              }
+            </div>
+            }
+          </div>
+        </mat-tab>
+
+        <!-- UPLOAD FROM FILES TAB -->
+        <mat-tab label="Upload Images">
+          <div class="tab-content">
+            <div>
+              <label for="characterFiles" style="display: none"
+                >Characters</label
+              >
+              <input
+                id="characterFiles"
+                type="file"
+                multiple
+                (change)="onFilesSelected($event)"
+                accept="image/*"
+                #fileInput
+                style="display: none"
+              />
+              <button
+                mat-raised-button
+                color="accent"
+                type="button"
+                (click)="fileInput.click()"
+              >
+                Choose Files
+              </button>
+              @if (uploadTabCharacters().length > 0) {
+              <span
+                >{{ uploadTabCharacters().length }} file(s) ready to crop</span
+              >
+              }
+            </div>
+
+            @if (uploadTabCharacters().length > 0) {
+            <div class="character-list-title">Crop and Name Characters:</div>
+            <div class="crop-grid">
+              @for (char of uploadTabCharacters(); track char.id) {
               <div class="crop-grid-item">
                 <div class="cropper-container">
                   <image-cropper

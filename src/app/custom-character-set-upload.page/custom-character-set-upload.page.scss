@@ -49,7 +49,7 @@
 .search-controls {
   display: flex;
   gap: 16px;
-  align-items: flex-start;
+  align-items: baseline;
   flex-wrap: wrap; // Allow wrapping on small screens
 
   .search-input-field {
