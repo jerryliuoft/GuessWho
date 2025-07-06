@@ -5,6 +5,7 @@ import {
   inject,
   computed,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
@@ -123,8 +124,16 @@ export class CustomCharacterSetUploadPage {
       this.state().status === 'searchingAnime' ||
       !this.state().animeSearchQuery.trim()
   );
+
+  private readonly isSetNameValid = toSignal(
+    this.form.controls.setName.statusChanges,
+    {
+      initialValue: this.form.controls.setName.status,
+    }
+  );
+
   readonly isUploadDisabled = computed(() => {
-    const setNameValid = this.form.controls.setName.valid;
+    const setNameValid = this.isSetNameValid() === 'VALID';
     const hasEnoughCharacters = this.croppedCharacterCount() > 1;
     return !setNameValid || !hasEnoughCharacters || this.isSubmitting();
   });

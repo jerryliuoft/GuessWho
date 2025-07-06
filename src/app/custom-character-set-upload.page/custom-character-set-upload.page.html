@@ -56,7 +56,9 @@
             } @else if (state().selectedAnime) {
             <div class="selected-anime-info">
               <h3>Characters from: {{ state().selectedAnime?.title }}</h3>
-              <button mat-button (click)="backToAnimeSearch()">Back to Anime Search</button>
+              <button mat-button (click)="backToAnimeSearch()">
+                Back to Anime Search
+              </button>
             </div>
             <div class="search-results">
               @for (char of state().characterSearchResults; track char.mal_id) {
@@ -109,9 +111,7 @@
               </div>
               }
             </div>
-            }
-
-            @if (searchTabCharacters().length > 0) {
+            } @if (searchTabCharacters().length > 0) {
             <div class="character-list-title">Crop and Name Characters:</div>
             <div class="crop-grid">
               @for (char of searchTabCharacters(); track char.id) {
@@ -223,10 +223,10 @@
       </div>
 
       @if (showCropMessage()) {
-        <div class="info-message">Please crop at least one character image to enable upload.</div>
-      }
-
-      @if (state().status === 'error' && !isSearching()) {
+      <div class="info-message">
+        Please crop at least one character image to enable upload.
+      </div>
+      } @if (state().status === 'error' && !isSearching()) {
       <div>{{ state().error }}</div>
       }
     </form>
