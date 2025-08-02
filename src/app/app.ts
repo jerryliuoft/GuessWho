@@ -10,7 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDialogModule } from '@angular/material/dialog';
 import { inject } from '@angular/core';
 import { GameService } from './game.service';
-import { RouterOutlet } from '@angular/router';
+import { RouterLink, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -24,6 +24,7 @@ import { RouterOutlet } from '@angular/router';
     MatSelectModule,
     MatDialogModule,
     RouterOutlet,
+    RouterLink,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',

@@ -23,7 +23,7 @@
       style="text-decoration: none"
     >
       <mat-icon>upload_file</mat-icon>
-      Upload Custom Set
+      Create
     </a>
   </div>
 
@@ -41,16 +41,16 @@
             alt="{{ character.name }}"
             class="character-thumbnail"
           />
-          }
-          @if (set.characters.length > 4) {
-          <div class="more-characters-overlay">+{{ set.characters.length - 4 }}</div>
+          } @if (set.characters.length > 4) {
+          <div class="more-characters-overlay">
+            +{{ set.characters.length - 4 }}
+          </div>
           }
         </div>
         <p class="character-count">{{ set.characters.length }} Characters</p>
       </mat-card-content>
     </mat-card>
-    }
-    @empty {
+    } @empty {
     <p class="no-results">No character sets found matching your criteria.</p>
     }
   </div>

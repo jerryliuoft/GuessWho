@@ -1,12 +1,7 @@
 <main>
-  <h2 class="page-title">Upload Custom Character Set</h2>
+  <h2 class="page-title">Create Custom Character Set</h2>
   <div class="upload-container">
     <form [formGroup]="form" (ngSubmit)="onUpload()" class="upload-form">
-      <mat-form-field appearance="outline" class="set-name-field">
-        <mat-label>Character Set Name</mat-label>
-        <input matInput formControlName="setName" required />
-      </mat-form-field>
-
       <mat-tab-group
         [selectedIndex]="selectedTabIndex()"
         (selectedIndexChange)="onTabChange($event)"
@@ -204,6 +199,10 @@
           </div>
         </mat-tab>
       </mat-tab-group>
+      <mat-form-field appearance="outline" class="set-name-field">
+        <mat-label>Set Name</mat-label>
+        <input matInput formControlName="setName" required />
+      </mat-form-field>
 
       <div class="button-row">
         <button
